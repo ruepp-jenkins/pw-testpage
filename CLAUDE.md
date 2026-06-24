@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A local-only **practice playground** for password managers, 2FA (TOTP), and passkeys (WebAuthn). It deliberately enforces **no** username/password content or strength rules — by design. Don't add validation of credential *content*; the only functional invariants are: username + password must be non-empty, usernames are unique, and login is strictly verified. User-facing copy is **German** (with an EN i18n layer); keep new strings bilingual.
+A **practice playground** for password managers, 2FA (TOTP), and passkeys (WebAuthn), built around throwaway accounts (no email, periodic auto-cleanup). It can run purely on `localhost` or be hosted behind a real domain. It deliberately enforces **no** username/password content or strength rules — by design. Don't add validation of credential *content*; the only functional invariants are: username + password must be non-empty, usernames are unique, and login is strictly verified. User-facing copy is **German** (with an EN i18n layer); keep new strings bilingual.
 
 ## Commands
 
@@ -45,14 +45,20 @@ Required env before running or testing: `APP_ENCRYPTION_KEY` (32 bytes as 64 hex
 
 **Login is two-step when 2FA is on.** `POST /api/login` verifies the password; if `totp_enabled`, it sets `req.session.pendingUserId` and returns `{ twofa: true }` *without* logging in. The session only becomes authenticated (`req.session.userId`) after `POST /api/login/totp` verifies the code. Password failures return a generic error to avoid user enumeration.
 
+**Account deletion is intentionally unauthenticated.** `POST /api/delete-account` deletes by `username` with no session or password check and always returns `{ ok: true }` whether or not the user existed (anti-enumeration); passkeys cascade away via `ON DELETE CASCADE`, and the caller's own session is destroyed if they deleted themselves. This fits the throwaway-account model — don't "harden" it into requiring auth without confirming that's wanted.
+
 **WebAuthn flow.** One-time challenges are held in the session (`regChallenge` / `authChallenge`), never sent to the client to keep. Only public keys + signature counters are persisted. Passwordless/discoverable login is supported: `POST /api/passkey/login/options` with no username yields `allowCredentials: undefined`.
 
-**No secrets in the frontend, enforced by CSP.** `src/app.js` sets a strict Content-Security-Policy: `'self'` only, no CDN, no inline scripts (`img-src` allows `data:` for QR codes). This is *why* the WebAuthn browser library is vendored locally via `scripts/vendor-webauthn.js` instead of loaded from a CDN — if you change frontend dependencies, keep them same-origin.
+**No secrets in the frontend, enforced by CSP.** `src/app.js` sets a strict Content-Security-Policy: `'self'` only, no CDN, no inline scripts (`img-src` allows `data:` for QR codes). This is *why* the WebAuthn browser library is vendored locally via `scripts/vendor-webauthn.js` instead of loaded from a CDN — if you change frontend dependencies, keep them same-origin. The same no-inline-scripts rule is why the language (`public/js/i18n.js`) and dark-mode (`public/js/theme.js`) layers are external files. `theme.js` is loaded **blocking in `<head>`** so it can set `data-theme` on `<html>` before first paint (no light-mode flash); theme colors live as CSS variables in `public/css/styles.css`, the choice persists in `localStorage('pm_theme')`, and it falls back to `prefers-color-scheme`. The i18n layer is the analogous pattern for language (`localStorage('pm_lang')`); keep new user-facing strings bilingual in both the static HTML and `i18n.js`.
 
 ## Tests
 
-`node:test` + `node:assert/strict`, run with `--test-force-exit`. `test/helpers.js` sets `APP_ENCRYPTION_KEY`/`SESSION_SECRET`/`NODE_ENV` **before** requiring any module that calls `crypto.loadKey()` — preserve that ordering when adding helpers. Each test gets a fresh in-memory DB via `startTestServer()`, and `makeClient()` is a minimal cookie-holding fetch client (one client ≈ one browser session; spin up a fresh client to simulate logout). CI (`.github/workflows/ci.yml`) runs the suite on Node 24 and also builds the Docker test stage.
+`node:test` + `node:assert/strict`, run with `--test-force-exit`. `test/helpers.js` sets `APP_ENCRYPTION_KEY`/`SESSION_SECRET`/`NODE_ENV` **before** requiring any module that calls `crypto.loadKey()` — preserve that ordering when adding helpers. Each test gets a fresh in-memory DB via `startTestServer()`, and `makeClient()` is a minimal cookie-holding fetch client (one client ≈ one browser session; spin up a fresh client to simulate logout).
 
-## WebAuthn / localhost gotcha
+CI is **Jenkins** (`Jenkinsfile`), not GitHub Actions (the old `.github/workflows/ci.yml` was removed). The pipeline runs `ci/start.sh`, which does a plain `docker build` and pushes the image to Docker Hub (`ruepp/pw-testpage`). Because that build targets the `runtime` stage — which depends on `build`, not `test` — **CI does not run the test suite**; the `test` stage only executes under `docker build --target test` or via `npm test` locally. Node 24 is required (`engines.node >= 24`).
 
-Always reach the app via `http://localhost:3000`, not a LAN IP. Browsers treat `localhost` as a secure context so passkeys work over plain HTTP, but `RP_ID` (`localhost`) and `ORIGIN` (`http://localhost:3000`) must match the URL in the address bar or verification fails.
+## WebAuthn origin & hosting
+
+Locally, always reach the app via `http://localhost:3000`, not a LAN IP: browsers treat `localhost` as a secure context so passkeys work over plain HTTP, but `RP_ID` (`localhost`) and `ORIGIN` (`http://localhost:3000`) must match the URL in the address bar or verification fails.
+
+When **hosted** behind a real domain, serve over **HTTPS** and override `RP_ID` (hostname only, e.g. `app.example.com`) and `ORIGIN` (full URL, e.g. `https://app.example.com`) to match — otherwise WebAuthn verification fails. Note that `cookie.secure` in `src/app.js` is hardcoded `false` (not gated on `NODE_ENV`), so session cookies are not flagged `Secure` even in production; change that there if you want HTTPS-only cookies.

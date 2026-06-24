@@ -80,7 +80,8 @@ npm test
 ```
 
 `node:test`-Suiten für Verschlüsselung, Auth (Register/Login/Logout), 2FA-Flow und Cleanup.
-Laufen auch in **CI** (`.github/workflows/ci.yml`) und in der **Docker-Test-Stage**.
+Laufen auch in der **Docker-Test-Stage** (`docker build --target test .`). Die **Jenkins**-Pipeline
+(`Jenkinsfile`) baut und pusht das Runtime-Image nach Docker Hub; sie führt die Test-Stage nicht aus.
 
 ---
 
