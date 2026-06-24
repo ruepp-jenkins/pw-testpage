@@ -6,6 +6,7 @@
   <title>Passwortmanager Übungs-Demo</title>
   <meta name="description" content="Übungsseite zum Trainieren deines Passwortmanagers – Registrierung, Login, 2FA und Passkeys. Rein zum Testen." />
   <link rel="stylesheet" href="/css/styles.css" />
+  <script src="/js/theme.js"></script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>" />
 </head>
 <body>
@@ -16,6 +17,10 @@
       <div class="lang-switch" role="group" aria-label="Sprache / Language">
         <button type="button" data-lang="de">DE</button>
         <button type="button" data-lang="en">EN</button>
+      </div>
+      <div class="theme-switch" role="group" data-i18n-aria="theme.switchLabel" aria-label="Design wählen">
+        <button type="button" data-theme-set="light" data-i18n-aria="theme.light" aria-label="Helles Design">☀</button>
+        <button type="button" data-theme-set="dark" data-i18n-aria="theme.dark" aria-label="Dunkles Design">☾</button>
       </div>
     </div>
   </nav>

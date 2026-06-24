@@ -19,6 +19,8 @@
   --radius-sm: 9px;
   --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
   --maxw: 920px;
+  --control-bg: #ffffff;   /* Hintergrund für Eingaben/Schalter; Dark Mode überschreibt */
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -34,6 +36,7 @@ body {
   color: var(--text);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  transition: background-color .2s ease, color .2s ease;
 }
 
 a { color: var(--primary); text-decoration: none; }
@@ -67,15 +70,15 @@ a:hover { text-decoration: underline; }
 .nav-links { display: flex; gap: 18px; align-items: center; }
 .nav-links a { color: var(--muted); font-size: .95rem; }
 
-/* Sprachumschalter */
-.lang-switch {
+/* Sprach- und Design-Umschalter (gleiche Optik) */
+.lang-switch, .theme-switch {
   display: inline-flex;
   border: 1px solid var(--border);
   border-radius: 999px;
   overflow: hidden;
-  background: #fff;
+  background: var(--control-bg);
 }
-.lang-switch button {
+.lang-switch button, .theme-switch button {
   border: 0;
   background: transparent;
   padding: 5px 11px;
@@ -85,8 +88,10 @@ a:hover { text-decoration: underline; }
   color: var(--muted);
   cursor: pointer;
 }
-.lang-switch button + button { border-left: 1px solid var(--border); }
-.lang-switch button.active { background: var(--primary); color: #fff; }
+.lang-switch button + button, .theme-switch button + button { border-left: 1px solid var(--border); }
+.lang-switch button.active, .theme-switch button.active { background: var(--primary); color: #fff; }
+/* Theme-Icons etwas größer als die DE/EN-Kürzel. */
+.theme-switch button { font-size: .95rem; line-height: 1; padding: 4px 10px; }
 
 .container {
   max-width: var(--maxw);
@@ -152,7 +157,7 @@ a:hover { text-decoration: underline; }
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font: inherit;
-  background: #fff;
+  background: var(--control-bg);
   color: var(--text);
   transition: border-color .15s, box-shadow .15s;
 }
@@ -179,9 +184,9 @@ a:hover { text-decoration: underline; }
 .btn:disabled { opacity: .6; cursor: not-allowed; }
 .btn-primary { background: var(--primary); color: #fff; }
 .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
-.btn-secondary { background: #fff; color: var(--text); border-color: var(--border); }
+.btn-secondary { background: var(--control-bg); color: var(--text); border-color: var(--border); }
 .btn-secondary:hover:not(:disabled) { background: var(--bg); }
-.btn-danger { background: #fff; color: var(--danger); border-color: #f3c6c6; }
+.btn-danger { background: var(--control-bg); color: var(--danger); border-color: #f3c6c6; }
 .btn-danger:hover:not(:disabled) { background: var(--danger-soft); }
 .btn-danger-solid { background: var(--danger); color: #fff; border-color: var(--danger); }
 .btn-danger-solid:hover:not(:disabled) { background: #c92a2a; border-color: #c92a2a; }
@@ -302,3 +307,37 @@ a:hover { text-decoration: underline; }
 .mt-14 { margin-top: 14px; }
 .mt-16 { margin-top: 16px; }
 .sub-tight { margin-top: -2px; }
+
+/* =========================================================================
+   Dark Mode – per [data-theme="dark"] am <html> umgeschaltet (theme.js).
+   Überschreibt vor allem die Farb-Variablen. QR-Codes bleiben bewusst hell
+   (.qr-wrap img), damit sie scanbar bleiben.
+   ========================================================================= */
+:root[data-theme="dark"] {
+  --bg: #0f141b;
+  --surface: #19202a;
+  --border: #2b333f;
+  --text: #e6eaf0;
+  --muted: #9aa6b4;
+  --primary: #4f70e8;
+  --primary-hover: #6181f0;
+  --primary-soft: #1b2440;
+  --success: #51cf66;
+  --success-soft: #15291b;
+  --danger: #ff6b6b;
+  --danger-soft: #2b1719;
+  --control-bg: #222b36;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+/* Komponenten mit fest verdrahteten Light-Farben für Dark Mode nachziehen. */
+:root[data-theme="dark"] .alert-error { color: #ffb0b0; border-color: #5b2b2b; }
+:root[data-theme="dark"] .alert-success { color: #8ce6a0; border-color: #2b5a38; }
+:root[data-theme="dark"] .alert-info { color: var(--primary); border-color: #314169; }
+:root[data-theme="dark"] .callout { color: #c2cdff; border-color: #314169; }
+:root[data-theme="dark"] .btn-danger { border-color: #5b2b2b; }
+:root[data-theme="dark"] .card-danger { border-color: #5b2b2b; }
+/* Solider Lösch-Button: in Dark Mode kräftiges Rot mit weißer Schrift statt
+   des aufgehellten --danger (sonst zu wenig Kontrast). */
+:root[data-theme="dark"] .btn-danger-solid { background: #e0383a; border-color: #e0383a; }

@@ -29,6 +29,7 @@
         logout: 'Abmelden',
       },
       common: { waiting: 'Bitte warten …', or: 'oder', cancel: 'Abbrechen' },
+      theme: { switchLabel: 'Design wählen', light: 'Helles Design', dark: 'Dunkles Design' },
       index: {
         badge: 'Demo · rein zum Üben',
         h1: 'Übe sicher mit deinem Passwortmanager',
@@ -150,6 +151,7 @@
         logout: 'Sign out',
       },
       common: { waiting: 'Please wait …', or: 'or', cancel: 'Cancel' },
+      theme: { switchLabel: 'Choose theme', light: 'Light theme', dark: 'Dark theme' },
       index: {
         badge: 'Demo · just for practice',
         h1: 'Practice safely with your password manager',
@@ -310,6 +312,9 @@
     });
     root.querySelectorAll('[data-i18n-alt]').forEach((el) => {
       el.setAttribute('alt', t(el.getAttribute('data-i18n-alt')));
+    });
+    root.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
     });
 
     document.querySelectorAll('[data-lang]').forEach((b) => {
