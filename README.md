@@ -113,11 +113,17 @@ Laufen auch in **CI** (`.github/workflows/ci.yml`) und in der **Docker-Test-Stag
 - **Sessions**: HttpOnly-Cookie, `SameSite=Lax`, in SQLite persistiert.
 - **Rate-Limit** auf den API-Routen gegen stures Durchprobieren.
 
-### Hinweis zu localhost & Passkeys
+### Hinweis zu Passkeys & sicherem Kontext
 
-WebAuthn verlangt einen „sicheren Kontext". Browser behandeln **`localhost` als sicher**, daher
-funktionieren Passkeys auch über `http://localhost:3000`. Wichtig: Immer über `localhost` aufrufen
-(nicht über die LAN-IP), damit `RP_ID`/`ORIGIN` passen.
+WebAuthn verlangt einen „sicheren Kontext". Es gibt zwei Wege, das zu erfüllen:
+
+- **Lokal:** Browser behandeln **`localhost` als sicher**, daher funktionieren Passkeys auch über
+  `http://localhost:3000`. Dann immer über `localhost` aufrufen (nicht über die LAN-IP), damit die
+  Defaults `RP_ID=localhost` / `ORIGIN=http://localhost:3000` passen.
+- **Gehostet:** Hinter einer echten Domain muss **HTTPS** verwendet werden. Setze `RP_ID` auf den
+  Hostnamen (z. B. `app.example.com`, ohne Schema/Port) und `ORIGIN` auf die vollständige URL
+  (z. B. `https://app.example.com`). Stimmen `RP_ID`/`ORIGIN` nicht mit der Adresszeile überein,
+  schlägt die Passkey-Verifikation fehl.
 
 ---
 
@@ -141,4 +147,4 @@ test/                # node:test-Suiten
 
 ---
 
-*Demo-Projekt – ausschließlich für lokale Übungszwecke gedacht.*
+*Übungs-Demo – bewusst ohne Passwort-/Inhaltsregeln, ausschließlich zum Testen gedacht.*

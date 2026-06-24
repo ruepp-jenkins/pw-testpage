@@ -113,7 +113,7 @@
         explainTitle: 'Kurz erklärt: 2FA & Passkeys',
         explainP1: '<strong>2FA (Zwei-Faktor-Authentifizierung)</strong> ist eine zusätzliche Sicherheitsstufe: Neben dem Passwort brauchst du einen zeitlich begrenzten Code aus einer App. Selbst wenn jemand dein Passwort kennt, fehlt ihm dieser Code.',
         explainP2: '<strong>Passkeys</strong> ersetzen das Passwort komplett. Statt etwas einzutippen, bestätigst du die Anmeldung mit deinem Gerät (Fingerabdruck/Gesicht/PIN). Das ist bequemer und sicher gegen Phishing.',
-        callout: '<strong>Gut zu wissen:</strong> Diese Seite läuft nur lokal auf deinem Rechner (<code>localhost</code>) und dient ausschließlich zum Üben. Es werden keine echten Konten, E-Mail-Adressen oder sensiblen Daten benötigt. Test-Accounts werden automatisch wieder aufgeräumt.',
+        callout: '<strong>Gut zu wissen:</strong> Diese Seite dient ausschließlich zum Üben. Es werden keine echten Konten, E-Mail-Adressen oder sensiblen Daten benötigt. Test-Accounts werden automatisch wieder aufgeräumt.',
         back: '← Zurück zur Demo',
       },
       errors: {
@@ -235,7 +235,7 @@
         explainTitle: 'In short: 2FA & passkeys',
         explainP1: '<strong>2FA (two-factor authentication)</strong> is an extra layer of security: besides your password you need a time-limited code from an app. Even if someone knows your password, they are missing this code.',
         explainP2: '<strong>Passkeys</strong> replace the password entirely. Instead of typing something, you confirm the sign-in with your device (fingerprint/face/PIN). It is more convenient and secure against phishing.',
-        callout: '<strong>Good to know:</strong> this page runs only locally on your computer (<code>localhost</code>) and is solely for practice. No real accounts, email addresses or sensitive data are needed. Test accounts are cleaned up automatically.',
+        callout: '<strong>Good to know:</strong> this page is solely for practice. No real accounts, email addresses or sensitive data are needed. Test accounts are cleaned up automatically.',
         back: '← Back to the demo',
       },
       errors: {
