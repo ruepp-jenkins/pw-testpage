@@ -46,6 +46,7 @@ module.exports = function passkeyRoutes({ db, config }) {
         rpID: config.rpID,
         userID: new TextEncoder().encode(String(user.id)),
         userName: user.username,
+        userDisplayName: user.username,
         attestationType: 'none',
         excludeCredentials: existing.map((c) => ({
           id: c.credential_id,
