@@ -183,7 +183,12 @@ a:hover { text-decoration: underline; }
 .btn-secondary:hover:not(:disabled) { background: var(--bg); }
 .btn-danger { background: #fff; color: var(--danger); border-color: #f3c6c6; }
 .btn-danger:hover:not(:disabled) { background: var(--danger-soft); }
+.btn-danger-solid { background: var(--danger); color: #fff; border-color: var(--danger); }
+.btn-danger-solid:hover:not(:disabled) { background: #c92a2a; border-color: #c92a2a; }
 .btn-inline { width: auto; padding: 8px 14px; font-size: .9rem; }
+
+/* Danger-Zone-Karte (Account löschen) – dezent rot abgesetzt. */
+.card-danger { border-color: #f3c6c6; }
 
 .hint { color: var(--muted); font-size: .85rem; margin-top: 8px; }
 

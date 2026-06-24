@@ -88,6 +88,10 @@
         passkeySaveFailed: 'Passkey konnte nicht gespeichert werden.',
         confirmRemovePasskey: 'Diesen Passkey entfernen?',
         passkeyUnsupported: 'Dein Browser unterstützt keine Passkeys.',
+        deleteDangerTitle: 'Account löschen',
+        deleteDangerSub: 'Diesen Test-Account und alle zugehörigen Daten (2FA, Passkeys) sofort und unwiderruflich löschen.',
+        deleteAccount: 'Diesen Account löschen',
+        deleteAccountConfirm: 'Diesen Account „{name}" wirklich endgültig löschen?',
       },
       guide: {
         badge: 'Für Einsteiger erklärt',
@@ -205,6 +209,10 @@
         passkeySaveFailed: 'The passkey could not be saved.',
         confirmRemovePasskey: 'Remove this passkey?',
         passkeyUnsupported: 'Your browser does not support passkeys.',
+        deleteDangerTitle: 'Delete account',
+        deleteDangerSub: 'Immediately and permanently delete this test account and all related data (2FA, passkeys).',
+        deleteAccount: 'Delete this account',
+        deleteAccountConfirm: 'Permanently delete this account “{name}”?',
       },
       guide: {
         badge: 'Explained for beginners',

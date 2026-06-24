@@ -247,6 +247,23 @@
     }
   }
 
+  // ---------- Account löschen ----------
+  $('btn-delete-account').addEventListener('click', async () => {
+    clearAlert();
+    if (!state.user) return;
+    const name = state.user.username;
+    if (!confirm(L('dashboard.deleteAccountConfirm').replace('{name}', name))) return;
+    const btn = $('btn-delete-account');
+    setLoading(btn, true);
+    try {
+      await api('/api/delete-account', { body: { username: name } });
+      window.location.href = '/';
+    } catch (err) {
+      showAlert(errMsg(err));
+      setLoading(btn, false);
+    }
+  });
+
   // ---------- Logout ----------
   $('logout').addEventListener('click', async () => {
     try {
