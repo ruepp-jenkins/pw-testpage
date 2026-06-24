@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    image: passwortmanager-demo:latest
+    # Auf localhost optimiert: nur an 127.0.0.1 binden (nicht öffentlich erreichbar).
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file:
+      - .env
+    environment:
+      # Innerhalb des Containers liegt die DB immer auf dem gemounteten Volume.
+      DB_PATH: /data/app.db
+    volumes:
+      # Persistente SQLite-DB über Container-Neustarts hinweg.
+      - appdata:/data
+    restart: unless-stopped
+
+volumes:
+  appdata:

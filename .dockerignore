@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log*
+.env
+data
+*.db
+*.db-shm
+*.db-wal
+*.log
+.git
+.github
+.gitignore
+.DS_Store
+public/vendor

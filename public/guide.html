@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de" data-i18n-title="meta.titleGuide">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anleitung · Passwortmanager Übungs-Demo</title>
+  <meta name="description" content="Schritt-für-Schritt-Anleitung für Einsteiger: Was ist ein Passwortmanager, was sind 2FA und Passkeys – und wie übst du damit?" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a class="brand" href="/"><span class="logo">🔐</span> <span data-i18n="nav.brand">Passwortmanager-Übung</span></a>
+    <div class="nav-links">
+      <a href="/" data-i18n="nav.demo">Zur Demo</a>
+      <div class="lang-switch" role="group" aria-label="Sprache / Language">
+        <button type="button" data-lang="de">DE</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container narrow guide">
+    <span class="demo-badge" data-i18n="guide.badge">Für Einsteiger erklärt</span>
+    <h1 data-i18n="guide.h1">Anleitung: Üben mit deinem Passwortmanager</h1>
+    <p class="card-sub" data-i18n-html="guide.sub">
+      Diese Seite ist ein <strong>Übungsplatz</strong>. Hier kannst du gefahrlos ausprobieren,
+      wie ein Passwortmanager funktioniert – mit Test-Accounts ohne echte Daten.
+    </p>
+
+    <div class="card">
+      <h2 class="mt-0" data-i18n="guide.whatTitle">Was ist ein Passwortmanager?</h2>
+      <p data-i18n-html="guide.whatP1">
+        Ein Passwortmanager ist ein digitaler Tresor. Er erstellt für jede Webseite ein
+        starkes, einzigartiges Passwort, speichert es verschlüsselt und füllt es beim Login
+        automatisch aus. Du musst dir nur <em>ein</em> Master-Passwort merken.
+      </p>
+      <p data-i18n-html="guide.whatP2">Beliebte Programme: <strong>Bitwarden</strong>, <strong>1Password</strong>,
+         <strong>KeePass</strong> oder der in Chrome/Safari/Firefox eingebaute Manager.</p>
+    </div>
+
+    <div class="card">
+      <h2 class="mt-0" data-i18n="guide.stepsTitle">In 4 Schritten zum ersten Test</h2>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="step-body">
+          <h3 data-i18n="guide.step1Title">Account anlegen</h3>
+          <p data-i18n-html="guide.step1Body">Gehe auf die <a href="/">Startseite</a>, wähle „Registrieren" und denk dir einen
+             beliebigen Benutzernamen und ein Passwort aus. Dein Passwortmanager bietet dabei an,
+             ein sicheres Passwort zu erzeugen und zu speichern – nimm das Angebot an.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">2</div>
+        <div class="step-body">
+          <h3 data-i18n="guide.step2Title">Abmelden und neu anmelden</h3>
+          <p data-i18n-html="guide.step2Body">Melde dich ab und wieder an. Beobachte, wie dein Passwortmanager die Felder
+             automatisch ausfüllt. Genau so läuft es später bei echten Webseiten.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">3</div>
+        <div class="step-body">
+          <h3 data-i18n="guide.step3Title">2FA einrichten</h3>
+          <p data-i18n-html="guide.step3Body">Im Dashboard kannst du „2FA einrichten" wählen. Scanne den QR-Code mit einer
+             Authenticator-App (z.B. <strong>Google Authenticator</strong>) oder speichere ihn in
+             deinem Passwortmanager. Beim nächsten Login wird zusätzlich ein 6-stelliger Code abgefragt.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">4</div>
+        <div class="step-body">
+          <h3 data-i18n="guide.step4Title">Passkey ausprobieren</h3>
+          <p data-i18n-html="guide.step4Body">Füge im Dashboard einen <strong>Passkey</strong> hinzu. Dein Gerät fragt nach
+             Fingerabdruck, Gesicht oder PIN. Danach kannst du dich ganz ohne Passwort anmelden –
+             einfach über „Mit Passkey anmelden".</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="mt-0" data-i18n="guide.explainTitle">Kurz erklärt: 2FA &amp; Passkeys</h2>
+      <p data-i18n-html="guide.explainP1"><strong>2FA (Zwei-Faktor-Authentifizierung)</strong> ist eine zusätzliche Sicherheitsstufe:
+         Neben dem Passwort brauchst du einen zeitlich begrenzten Code aus einer App. Selbst wenn
+         jemand dein Passwort kennt, fehlt ihm dieser Code.</p>
+      <p data-i18n-html="guide.explainP2"><strong>Passkeys</strong> ersetzen das Passwort komplett. Statt etwas einzutippen, bestätigst
+         du die Anmeldung mit deinem Gerät (Fingerabdruck/Gesicht/PIN). Das ist bequemer und sicher
+         gegen Phishing.</p>
+    </div>
+
+    <div class="callout" data-i18n-html="guide.callout">
+      <strong>Gut zu wissen:</strong> Diese Seite läuft nur lokal auf deinem Rechner
+      (<code>localhost</code>) und dient ausschließlich zum Üben. Es werden keine echten Konten,
+      E-Mail-Adressen oder sensiblen Daten benötigt. Test-Accounts werden automatisch wieder
+      aufgeräumt.
+    </div>
+
+    <p class="footer"><a href="/" data-i18n="guide.back">← Zurück zur Demo</a></p>
+  </main>
+
+  <script src="/js/i18n.js"></script>
+</body>
+</html>

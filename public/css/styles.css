@@ -1,0 +1,299 @@
+/* =========================================================================
+   Passwortmanager Übungs-Demo – minimalistisches, klares Design
+   ========================================================================= */
+
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --border: #e3e6ea;
+  --text: #1c2430;
+  --muted: #6b7787;
+  --primary: #3b5bdb;
+  --primary-hover: #324bb8;
+  --primary-soft: #eef1fd;
+  --success: #2f9e44;
+  --success-soft: #ebfbee;
+  --danger: #e03131;
+  --danger-soft: #fff0f0;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+  --maxw: 920px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- Layout ---------- */
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 18px 20px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 650;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+.brand:hover { text-decoration: none; }
+.brand .logo {
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  background: var(--primary); color: #fff;
+  border-radius: 8px; font-size: 16px;
+}
+.nav-links { display: flex; gap: 18px; align-items: center; }
+.nav-links a { color: var(--muted); font-size: .95rem; }
+
+/* Sprachumschalter */
+.lang-switch {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: #fff;
+}
+.lang-switch button {
+  border: 0;
+  background: transparent;
+  padding: 5px 11px;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 650;
+  color: var(--muted);
+  cursor: pointer;
+}
+.lang-switch button + button { border-left: 1px solid var(--border); }
+.lang-switch button.active { background: var(--primary); color: #fff; }
+
+.container {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 8px 20px 56px;
+}
+.narrow { max-width: 460px; }
+
+/* ---------- Card ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  margin-bottom: 22px;
+}
+.card h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.card .card-sub { color: var(--muted); margin: 0 0 18px; font-size: .94rem; }
+
+.hero { text-align: center; padding: 26px 20px 10px; }
+.hero h1 { font-size: 1.7rem; margin: 0 0 8px; letter-spacing: -0.01em; }
+.hero p { color: var(--muted); margin: 0 auto; max-width: 540px; }
+
+.demo-badge {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 4px 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+/* ---------- Tabs ---------- */
+.tabs {
+  display: flex;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  margin-bottom: 22px;
+}
+.tab {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 9px 12px;
+  border-radius: 7px;
+  font: inherit;
+  font-weight: 550;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+/* ---------- Forms ---------- */
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: .9rem; font-weight: 550; margin-bottom: 6px; }
+.input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  background: #fff;
+  color: var(--text);
+  transition: border-color .15s, box-shadow .15s;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+.btn-secondary { background: #fff; color: var(--text); border-color: var(--border); }
+.btn-secondary:hover:not(:disabled) { background: var(--bg); }
+.btn-danger { background: #fff; color: var(--danger); border-color: #f3c6c6; }
+.btn-danger:hover:not(:disabled) { background: var(--danger-soft); }
+.btn-inline { width: auto; padding: 8px 14px; font-size: .9rem; }
+
+.hint { color: var(--muted); font-size: .85rem; margin-top: 8px; }
+
+/* ---------- "Test-Account löschen" (zurückhaltend, da destruktiv) ---------- */
+.delete-account { margin-top: 18px; }
+.delete-account > summary {
+  cursor: pointer; list-style: none;
+  color: var(--muted); font-size: .85rem; text-align: center;
+  padding: 6px; user-select: none;
+}
+.delete-account > summary::-webkit-details-marker { display: none; }
+.delete-account > summary:hover { color: var(--danger); }
+.delete-account[open] > summary { color: var(--text); margin-bottom: 10px; }
+.delete-account form {
+  border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px;
+}
+
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--muted); font-size: .82rem; margin: 18px 0;
+}
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+/* ---------- Alerts ---------- */
+.alert {
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  font-size: .9rem;
+  margin-bottom: 16px;
+  display: none;
+}
+.alert.show { display: block; }
+.alert-error { background: var(--danger-soft); color: #b42318; border: 1px solid #f3c6c6; }
+.alert-success { background: var(--success-soft); color: #1e7a32; border: 1px solid #c3ecca; }
+.alert-info { background: var(--primary-soft); color: var(--primary); border: 1px solid #d4ddfb; }
+
+/* ---------- Badges / status ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600;
+}
+.badge-on { background: var(--success-soft); color: var(--success); }
+.badge-off { background: var(--bg); color: var(--muted); }
+
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+
+/* ---------- Dashboard ---------- */
+.dash-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.dash-head h1 { font-size: 1.45rem; margin: 0; }
+.dash-grid { display: grid; gap: 22px; grid-template-columns: 1fr 1fr; }
+@media (max-width: 760px) { .dash-grid { grid-template-columns: 1fr; } }
+
+.qr-wrap { text-align: center; padding: 8px 0 4px; }
+.qr-wrap img { width: 196px; height: 196px; border: 1px solid var(--border); border-radius: var(--radius-sm); background:#fff; }
+.secret-pill {
+  display: inline-block; margin-top: 10px; padding: 8px 12px;
+  background: var(--bg); border: 1px dashed var(--border); border-radius: var(--radius-sm);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9rem; letter-spacing: 1px;
+  word-break: break-all;
+}
+
+.list { list-style: none; padding: 0; margin: 0; }
+.list-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 0; border-top: 1px solid var(--border);
+}
+.list-item:first-child { border-top: 0; }
+.list-item .meta { font-size: .85rem; color: var(--muted); }
+.empty { color: var(--muted); font-size: .92rem; padding: 8px 0; }
+
+/* ---------- Guide ---------- */
+.guide h1 { font-size: 1.6rem; margin-top: 0; }
+.guide h2 { font-size: 1.15rem; margin-top: 30px; }
+.guide ol, .guide ul { padding-left: 22px; }
+.guide li { margin: 8px 0; }
+.step {
+  display: flex; gap: 14px; padding: 16px 0; border-top: 1px solid var(--border);
+}
+.step:first-of-type { border-top: 0; }
+.step .num {
+  flex: 0 0 30px; height: 30px; width: 30px; border-radius: 50%;
+  background: var(--primary-soft); color: var(--primary);
+  display: grid; place-items: center; font-weight: 700;
+}
+.step .step-body h3 { margin: 2px 0 4px; font-size: 1rem; }
+.step .step-body p { margin: 0; color: var(--muted); }
+
+.callout {
+  background: var(--primary-soft);
+  border: 1px solid #d4ddfb;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  color: #2a3a8c;
+  font-size: .92rem;
+  margin: 18px 0;
+}
+
+.footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 24px 0 8px; }
+
+/* Dezenter Hinweis auf die automatische Löschung – bewusst unauffällig. */
+.expiry-note { text-align: center; color: var(--muted); font-size: .78rem; opacity: .8; margin: 24px 0 0; }
+.expiry-note[hidden] { display: none; }
+
+.spin { display: inline-block; width: 15px; height: 15px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hidden { display: none !important; }
+
+/* Kleine Layout-Utilities (statt Inline-Styles, damit die strikte CSP greift) */
+.mt-0 { margin-top: 0; }
+.mt-10 { margin-top: 10px; }
+.mt-14 { margin-top: 14px; }
+.mt-16 { margin-top: 16px; }
+.sub-tight { margin-top: -2px; }

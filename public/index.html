@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="de" data-i18n-title="meta.titleIndex">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Passwortmanager Übungs-Demo</title>
+  <meta name="description" content="Übungsseite zum Trainieren deines Passwortmanagers – Registrierung, Login, 2FA und Passkeys. Rein zum Testen." />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a class="brand" href="/"><span class="logo">🔐</span> <span data-i18n="nav.brand">Passwortmanager-Übung</span></a>
+    <div class="nav-links">
+      <a href="/guide" data-i18n="nav.guide">Anleitung</a>
+      <div class="lang-switch" role="group" aria-label="Sprache / Language">
+        <button type="button" data-lang="de">DE</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container narrow">
+    <div class="hero">
+      <span class="demo-badge" data-i18n="index.badge">Demo · rein zum Üben</span>
+      <h1 data-i18n="index.h1">Übe sicher mit deinem Passwortmanager</h1>
+      <p data-i18n="index.p">Lege einen Test-Account an, speichere ihn in deinem Passwortmanager und probiere
+         Login, 2FA und Passkeys aus. Keine E-Mail, keine echten Daten nötig.</p>
+    </div>
+
+    <div class="card">
+      <div class="tabs" role="tablist">
+        <button class="tab active" id="tab-login" type="button" data-i18n="index.tabLogin">Anmelden</button>
+        <button class="tab" id="tab-register" type="button" data-i18n="index.tabRegister">Registrieren</button>
+      </div>
+
+      <div class="alert" id="alert"></div>
+
+      <!-- Login -->
+      <form id="form-login" autocomplete="on">
+        <div class="field">
+          <label for="login-username" data-i18n="index.username">Benutzername</label>
+          <input class="input" id="login-username" name="username" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="login-password" data-i18n="index.password">Passwort</label>
+          <input class="input" id="login-password" name="password" type="password" autocomplete="current-password" required />
+        </div>
+        <button class="btn btn-primary" type="submit" id="login-submit" data-i18n="index.loginSubmit">Anmelden</button>
+        <p class="hint" data-i18n="index.loginHint">Tipp: Lass deinen Passwortmanager Benutzername &amp; Passwort speichern und ausfüllen.</p>
+      </form>
+
+      <!-- 2FA-Code (erscheint nur, wenn für den Account aktiviert) -->
+      <form id="form-totp" class="hidden">
+        <div class="field">
+          <label for="totp-code" data-i18n="index.totpLabel">2FA-Code aus deiner Authenticator-App</label>
+          <input class="input" id="totp-code" name="token" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" required />
+        </div>
+        <button class="btn btn-primary" type="submit" data-i18n="index.totpSubmit">Code bestätigen</button>
+        <button class="btn btn-secondary mt-10" type="button" id="totp-cancel" data-i18n="common.cancel">Abbrechen</button>
+      </form>
+
+      <!-- Registrierung -->
+      <form id="form-register" class="hidden" autocomplete="on">
+        <div class="field">
+          <label for="reg-username" data-i18n="index.username">Benutzername</label>
+          <input class="input" id="reg-username" name="username" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="reg-password" data-i18n="index.password">Passwort</label>
+          <input class="input" id="reg-password" name="password" type="password" autocomplete="new-password" required />
+        </div>
+        <button class="btn btn-primary" type="submit" id="reg-submit" data-i18n="index.regSubmit">Account anlegen</button>
+        <p class="hint" data-i18n="index.regHint">Diese Übungsseite stellt keine Anforderungen an Benutzername oder Passwort.</p>
+      </form>
+
+      <div class="divider" id="passkey-divider" data-i18n="common.or">oder</div>
+      <button class="btn btn-secondary" type="button" id="passkey-login" data-i18n="index.passkeyLogin">🔑 Mit Passkey anmelden</button>
+    </div>
+
+    <details class="delete-account" id="delete-account">
+      <summary data-i18n="index.deleteSummary">Test-Account löschen</summary>
+      <form id="form-delete" autocomplete="off">
+        <p class="hint" data-i18n="index.deleteHint">Gib einen Benutzernamen ein, um diesen Test-Account und alle zugehörigen
+           Daten (2FA, Passkeys) sofort und unwiderruflich zu löschen – praktisch, um ihn neu anzulegen.</p>
+        <div class="field">
+          <label for="delete-username" data-i18n="index.username">Benutzername</label>
+          <input class="input" id="delete-username" name="username" autocomplete="off" required />
+        </div>
+        <button class="btn btn-danger" type="submit" id="delete-submit" data-i18n="index.deleteSubmit">Account löschen</button>
+      </form>
+    </details>
+
+    <p class="footer" data-i18n-html="index.footer">Lerne mehr in der <a href="/guide">Schritt-für-Schritt-Anleitung</a>.</p>
+  </main>
+
+  <script src="/vendor/simplewebauthn-browser.umd.min.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

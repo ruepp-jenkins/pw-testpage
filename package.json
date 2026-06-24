@@ -1,0 +1,31 @@
+{
+  "name": "passwortmanager-uebungs-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minimalistische Übungs-Webseite zum Trainieren von Passwortmanagern: Registrierung, Login, 2FA (Google Authenticator) und Passkeys – rein zum Testen, ohne E-Mail.",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test --test-force-exit test/*.test.js",
+    "vendor": "node scripts/vendor-webauthn.js",
+    "postinstall": "node scripts/vendor-webauthn.js"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^13.1.0",
+    "@simplewebauthn/server": "^13.1.0",
+    "argon2": "^0.41.1",
+    "better-sqlite3": "^11.8.1",
+    "better-sqlite3-session-store": "^0.1.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.4"
+  }
+}

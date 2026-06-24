@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="de" data-i18n-title="meta.titleDashboard">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard · Passwortmanager Übungs-Demo</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a class="brand" href="/"><span class="logo">🔐</span> <span data-i18n="nav.brand">Passwortmanager-Übung</span></a>
+    <div class="nav-links">
+      <a href="/guide" data-i18n="nav.guide">Anleitung</a>
+      <div class="lang-switch" role="group" aria-label="Sprache / Language">
+        <button type="button" data-lang="de">DE</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+      <button class="btn btn-secondary btn-inline" id="logout" type="button" data-i18n="nav.logout">Abmelden</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="dash-head">
+      <h1><span data-i18n="dashboard.hello">Hallo,</span> <span id="username">…</span> 👋</h1>
+      <span class="badge badge-off" id="account-badge" data-i18n="dashboard.accountBadge">Test-Account</span>
+    </div>
+    <p class="card-sub sub-tight" data-i18n-html="dashboard.intro">
+      Hier kannst du <strong>2FA</strong> und <strong>Passkeys</strong> einrichten und mit deinem
+      Passwortmanager üben. Melde dich danach ab und wieder an, um den Ablauf zu testen.
+    </p>
+
+    <div class="alert" id="alert"></div>
+
+    <div class="dash-grid">
+      <!-- ============ 2FA ============ -->
+      <section class="card">
+        <div class="row-between">
+          <h2 data-i18n="dashboard.twofaTitle">2FA · Google Authenticator</h2>
+          <span class="badge badge-off" id="twofa-badge" data-i18n="dashboard.badgeInactive">inaktiv</span>
+        </div>
+        <p class="card-sub" data-i18n="dashboard.twofaSub">Zeitbasierte Einmal-Codes (TOTP) als zweiter Faktor.</p>
+
+        <!-- Zustand: aus -> einrichten -->
+        <div id="twofa-setup-start">
+          <button class="btn btn-primary" id="btn-2fa-start" type="button" data-i18n="dashboard.twofaStart">2FA einrichten</button>
+        </div>
+
+        <!-- Zustand: QR anzeigen + Code bestätigen -->
+        <div id="twofa-setup-confirm" class="hidden">
+          <div class="qr-wrap">
+            <img id="twofa-qr" data-i18n-alt="dashboard.qrAlt" alt="QR-Code für die Authenticator-App" />
+            <div>
+              <span class="hint" data-i18n="dashboard.twofaScan">QR scannen oder Schlüssel manuell eingeben:</span><br />
+              <span class="secret-pill" id="twofa-secret"></span>
+            </div>
+          </div>
+          <form id="form-2fa-verify" class="mt-16">
+            <div class="field">
+              <label for="twofa-code" data-i18n="dashboard.twofaCodeLabel">Code aus der App</label>
+              <input class="input" id="twofa-code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" required />
+            </div>
+            <button class="btn btn-primary" type="submit" data-i18n="dashboard.twofaActivate">Aktivieren</button>
+            <button class="btn btn-secondary mt-10" type="button" id="btn-2fa-cancel" data-i18n="common.cancel">Abbrechen</button>
+          </form>
+        </div>
+
+        <!-- Zustand: an -> deaktivieren -->
+        <div id="twofa-active" class="hidden">
+          <p class="hint" data-i18n="dashboard.twofaActiveInfo">2FA ist aktiv. Beim nächsten Login wird ein Code abgefragt.</p>
+          <button class="btn btn-danger" id="btn-2fa-disable" type="button" data-i18n="dashboard.twofaDisable">2FA deaktivieren</button>
+        </div>
+      </section>
+
+      <!-- ============ Passkeys ============ -->
+      <section class="card">
+        <div class="row-between">
+          <h2 data-i18n="dashboard.passkeysTitle">Passkeys</h2>
+          <span class="badge badge-off" id="passkey-count-badge">0</span>
+        </div>
+        <p class="card-sub" data-i18n="dashboard.passkeysSub">Passwortlose Anmeldung per Gerät, Fingerabdruck oder Sicherheits-Key.</p>
+
+        <ul class="list" id="passkey-list"></ul>
+        <p class="empty hidden" id="passkey-empty" data-i18n="dashboard.passkeysEmpty">Noch keine Passkeys hinterlegt.</p>
+
+        <form id="form-passkey-add" class="mt-14">
+          <div class="field">
+            <label for="passkey-nickname" data-i18n="dashboard.passkeyName">Name (optional)</label>
+            <input class="input" id="passkey-nickname" data-i18n-ph="dashboard.passkeyNamePh" placeholder="z.B. Mein Laptop" />
+          </div>
+          <button class="btn btn-primary" type="submit" id="btn-passkey-add" data-i18n="dashboard.passkeyAdd">🔑 Passkey hinzufügen</button>
+        </form>
+      </section>
+    </div>
+
+    <p class="expiry-note" id="deletion-notice" hidden></p>
+
+    <p class="footer" data-i18n-html="dashboard.footer">Brauchst du Hilfe? Schau in die <a href="/guide">Anleitung</a>.</p>
+  </main>
+
+  <script src="/vendor/simplewebauthn-browser.umd.min.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

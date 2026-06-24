@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      # Nur für den Testlauf – keine echten Secrets.
+      APP_ENCRYPTION_KEY: '0000000000000000000000000000000000000000000000000000000000000000'
+      SESSION_SECRET: 'ci-test-secret'
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Tests ausführen
+        run: npm test
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Baut bis zur Test-Stage -> npm test läuft im Container.
+      - name: Docker-Test-Stage bauen
+        run: docker build --target test -t passwortmanager-demo:test .
+
+      - name: Production-Image bauen
+        run: docker build -t passwortmanager-demo:latest .
