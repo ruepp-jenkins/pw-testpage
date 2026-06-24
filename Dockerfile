@@ -8,7 +8,7 @@
 # =========================================================================
 
 # ---- Build-Stage: Toolchain für native Module (better-sqlite3, argon2) ----
-FROM node:22-bookworm-slim AS build
+FROM node:24-bookworm-slim AS build
 WORKDIR /app
 RUN apt-get update \
  && apt-get install -y --no-install-recommends python3 make g++ \
@@ -30,7 +30,7 @@ RUN NODE_ENV=test \
     npm test
 
 # ---- Runtime-Stage: schlank, ohne Toolchain, als non-root ----
-FROM node:22-bookworm-slim AS runtime
+FROM node:24-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     PORT=3000 \
     DB_PATH=/data/app.db

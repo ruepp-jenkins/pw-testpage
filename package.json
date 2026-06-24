@@ -5,7 +5,7 @@
   "description": "Minimalistische Übungs-Webseite zum Trainieren von Passwortmanagern: Registrierung, Login, 2FA (Google Authenticator) und Passkeys – rein zum Testen, ohne E-Mail.",
   "type": "commonjs",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "start": "node server.js",

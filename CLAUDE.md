@@ -51,7 +51,7 @@ Required env before running or testing: `APP_ENCRYPTION_KEY` (32 bytes as 64 hex
 
 ## Tests
 
-`node:test` + `node:assert/strict`, run with `--test-force-exit`. `test/helpers.js` sets `APP_ENCRYPTION_KEY`/`SESSION_SECRET`/`NODE_ENV` **before** requiring any module that calls `crypto.loadKey()` — preserve that ordering when adding helpers. Each test gets a fresh in-memory DB via `startTestServer()`, and `makeClient()` is a minimal cookie-holding fetch client (one client ≈ one browser session; spin up a fresh client to simulate logout). CI (`.github/workflows/ci.yml`) runs the suite on Node 22 and also builds the Docker test stage.
+`node:test` + `node:assert/strict`, run with `--test-force-exit`. `test/helpers.js` sets `APP_ENCRYPTION_KEY`/`SESSION_SECRET`/`NODE_ENV` **before** requiring any module that calls `crypto.loadKey()` — preserve that ordering when adding helpers. Each test gets a fresh in-memory DB via `startTestServer()`, and `makeClient()` is a minimal cookie-holding fetch client (one client ≈ one browser session; spin up a fresh client to simulate logout). CI (`.github/workflows/ci.yml`) runs the suite on Node 24 and also builds the Docker test stage.
 
 ## WebAuthn / localhost gotcha
 
