@@ -47,8 +47,8 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'chmod +x scripts/*.sh'
-                sh './scripts/start.sh'
+                sh 'chmod +x ci/*.sh'
+                sh './ci/start.sh'
             }
         }
     }
