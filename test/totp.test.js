@@ -3,13 +3,13 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { authenticator } = require('otplib');
-const { startTestServer, makeClient } = require('./helpers');
+const { startTestServer, makeClient, clientHash } = require('./helpers');
 
 test('2FA-Flow: einrichten, aktivieren, Login mit Code', async () => {
   const s = await startTestServer();
   try {
     const c = s.client;
-    await c.post('/api/register', { username: 'tina', password: 'geheim' });
+    await c.post('/api/register', { username: 'tina', password: clientHash('tina', 'geheim') });
 
     // Setup
     const setup = await c.post('/api/2fa/setup');
@@ -32,7 +32,7 @@ test('2FA-Flow: einrichten, aktivieren, Login mit Code', async () => {
 
     // Neuer Login verlangt jetzt 2FA
     const fresh = makeClient(s.baseURL);
-    const login = await fresh.post('/api/login', { username: 'tina', password: 'geheim' });
+    const login = await fresh.post('/api/login', { username: 'tina', password: clientHash('tina', 'geheim') });
     assert.equal(login.status, 200);
     assert.equal(login.data.twofa, true);
 
@@ -53,13 +53,13 @@ test('2FA deaktivieren entfernt die Anforderung', async () => {
   const s = await startTestServer();
   try {
     const c = s.client;
-    await c.post('/api/register', { username: 'uwe', password: 'pw' });
+    await c.post('/api/register', { username: 'uwe', password: clientHash('uwe', 'pw') });
     const setup = await c.post('/api/2fa/setup');
     await c.post('/api/2fa/verify', { token: authenticator.generate(setup.data.secret) });
     await c.post('/api/2fa/disable');
 
     const fresh = makeClient(s.baseURL);
-    const login = await fresh.post('/api/login', { username: 'uwe', password: 'pw' });
+    const login = await fresh.post('/api/login', { username: 'uwe', password: clientHash('uwe', 'pw') });
     assert.equal(login.data.twofa, false);
   } finally {
     await s.close();

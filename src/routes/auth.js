@@ -9,6 +9,14 @@
  *   - Benutzername & Passwort müssen vorhanden (nicht leer) sein,
  *   - Benutzernamen sind eindeutig (kein doppeltes Anlegen),
  *   - Login wird strikt geprüft (nur korrektes Passwort führt zum Erfolg).
+ *
+ * Double-Hash: Das `password`-Feld enthält NICHT den Klartext, sondern bereits
+ * einen client-seitigen PBKDF2-Hash (siehe public/js/pwhash.js). Der Klartext
+ * verlässt den Browser nie – Server, Logs und DB sehen ihn nie. Wir hashen den
+ * empfangenen Wert ein zweites Mal mit argon2 (zufälliger Salt) für die DB und
+ * verweigern alles, was nicht wie ein Client-Hash aussieht (PW_HASH_RE), damit
+ * versehentlich kein Klartext gespeichert wird. Das ist eine Transport-Format-
+ * prüfung, KEINE Inhalts-/Stärkeprüfung des Passworts.
  */
 
 const express = require('express');
@@ -23,6 +31,12 @@ const ARGON_OPTS = { type: argon2.argon2id };
 
 module.exports = function authRoutes({ db, config }) {
   const router = express.Router();
+
+  // Erwartetes Wire-Format des client-seitig vorgehashten Passworts
+  // (pbkdf2$<iter>$<hex>, siehe public/js/pwhash.js). Wehrt versehentlichen
+  // Klartext ab – garantiert aber NICHT, dass es der Hash eines echten Passworts
+  // ist; den Klartext nie zu übertragen leistet allein der Client.
+  const PW_HASH_RE = /^pbkdf2\$\d+\$[0-9a-f]{32,}$/;
 
   // Voraussichtlicher Löschzeitpunkt eines Accounts (oder null, wenn der
   // Cleanup-Job deaktiviert ist). Spiegelt die Logik aus cleanup.js wider:
@@ -44,6 +58,13 @@ module.exports = function authRoutes({ db, config }) {
         return res
           .status(400)
           .json({ error: 'Benutzername und Passwort sind erforderlich.', code: 'MISSING_CREDENTIALS' });
+      }
+
+      // Es muss ein client-seitiger Hash sein, nie Klartext.
+      if (!PW_HASH_RE.test(password)) {
+        return res
+          .status(400)
+          .json({ error: 'Passwort muss im Browser gehasht werden.', code: 'PASSWORD_NOT_HASHED' });
       }
 
       if (store.getUserByUsername(db, username)) {
@@ -71,6 +92,14 @@ module.exports = function authRoutes({ db, config }) {
     try {
       const username = typeof req.body.username === 'string' ? req.body.username.trim() : '';
       const password = typeof req.body.password === 'string' ? req.body.password : '';
+
+      // Client-Hash erwartet (nie Klartext). Antwort ist account-unabhängig,
+      // verrät also nichts über die Existenz des Benutzers.
+      if (!PW_HASH_RE.test(password)) {
+        return res
+          .status(400)
+          .json({ error: 'Passwort muss im Browser gehasht werden.', code: 'PASSWORD_NOT_HASHED' });
+      }
 
       const user = store.getUserByUsername(db, username);
 

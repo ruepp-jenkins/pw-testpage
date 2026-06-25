@@ -159,6 +159,8 @@
       errors: {
         MISSING_CREDENTIALS: 'Benutzername und Passwort sind erforderlich.',
         MISSING_USERNAME: 'Benutzername ist erforderlich.',
+        PASSWORD_NOT_HASHED: 'Das Passwort konnte im Browser nicht gehasht werden. Bitte lade die Seite neu.',
+        SECURE_CONTEXT_REQUIRED: 'Sichere Verbindung nötig: Passwort-Hashing im Browser ist nur über localhost oder HTTPS möglich.',
         USERNAME_TAKEN: 'Benutzername bereits vergeben.',
         INVALID_CREDENTIALS: 'Benutzername oder Passwort ist falsch.',
         NO_LOGIN_FLOW: 'Kein laufender Login-Vorgang.',
@@ -321,6 +323,8 @@
       errors: {
         MISSING_CREDENTIALS: 'Username and password are required.',
         MISSING_USERNAME: 'A username is required.',
+        PASSWORD_NOT_HASHED: 'The password could not be hashed in your browser. Please reload the page.',
+        SECURE_CONTEXT_REQUIRED: 'A secure connection is required: in-browser password hashing only works over localhost or HTTPS.',
         USERNAME_TAKEN: 'Username is already taken.',
         INVALID_CREDENTIALS: 'Username or password is incorrect.',
         NO_LOGIN_FLOW: 'No login in progress.',

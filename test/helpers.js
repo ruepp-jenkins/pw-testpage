@@ -11,9 +11,26 @@ process.env.APP_ENCRYPTION_KEY =
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'test-secret';
 process.env.NODE_ENV = 'test';
 
+const crypto = require('node:crypto');
+
 const { openDb } = require('../src/db');
 const { loadConfig } = require('../src/config');
 const { createApp } = require('../src/app');
+
+// Spiegelt das client-seitige Passwort-Hashing aus public/js/pwhash.js, damit
+// Tests dasselbe Wire-Format (pbkdf2$<iter>$<hex>) senden wie ein echter Browser.
+// Parameter MÜSSEN mit pwhash.js übereinstimmen.
+const PW_ITERATIONS = 210000;
+const PW_KEYLEN = 32; // 256 bit
+const PW_CONTEXT = 'pm-practice|pw|v1|';
+
+function clientHash(username, password) {
+  const salt = PW_CONTEXT + String(username == null ? '' : username).trim();
+  const hex = crypto
+    .pbkdf2Sync(String(password == null ? '' : password), salt, PW_ITERATIONS, PW_KEYLEN, 'sha256')
+    .toString('hex');
+  return 'pbkdf2$' + PW_ITERATIONS + '$' + hex;
+}
 
 async function startTestServer() {
   const db = openDb(':memory:');
@@ -82,4 +99,4 @@ function makeClient(baseURL) {
   };
 }
 
-module.exports = { startTestServer, makeClient };
+module.exports = { startTestServer, makeClient, clientHash };

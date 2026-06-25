@@ -34,6 +34,17 @@
     return (err && err.message) || L('errors.GENERIC');
   }
 
+  // Passwort NUR client-seitig vorgehasht senden (Double-Hash, siehe pwhash.js):
+  // der Klartext verlässt den Browser nie. Der Salt hängt am Benutzernamen.
+  async function hashPw(username, password) {
+    if (!window.PwHash) {
+      const err = new Error('Password hashing unavailable.');
+      err.code = 'SECURE_CONTEXT_REQUIRED';
+      throw err;
+    }
+    return window.PwHash.hashPassword(username, password);
+  }
+
   async function api(path, body) {
     const res = await fetch(path, {
       method: 'POST',
@@ -88,9 +99,10 @@
     const btn = $('reg-submit');
     setLoading(btn, true);
     try {
+      const username = $('reg-username').value;
       await api('/api/register', {
-        username: $('reg-username').value,
-        password: $('reg-password').value,
+        username,
+        password: await hashPw(username, $('reg-password').value),
       });
       goDashboard();
     } catch (err) {
@@ -106,9 +118,10 @@
     const btn = $('login-submit');
     setLoading(btn, true);
     try {
+      const username = $('login-username').value;
       const data = await api('/api/login', {
-        username: $('login-username').value,
-        password: $('login-password').value,
+        username,
+        password: await hashPw(username, $('login-password').value),
       });
       if (data.twofa) {
         // 2FA verlangt: Login-Form aus, TOTP-Form an.

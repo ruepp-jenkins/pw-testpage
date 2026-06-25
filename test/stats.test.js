@@ -2,7 +2,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { startTestServer, makeClient } = require('./helpers');
+const { startTestServer, makeClient, clientHash } = require('./helpers');
 const { runCleanupOnce } = require('../src/cleanup');
 
 test('Stats: leere Statistik liefert nur aggregierte Zahlen, keine Namen', async () => {
@@ -23,8 +23,8 @@ test('Stats: leere Statistik liefert nur aggregierte Zahlen, keine Namen', async
 test('Stats: Registrierung zählt account_created + Live-Accounts', async () => {
   const s = await startTestServer();
   try {
-    await s.client.post('/api/register', { username: 'alice', password: 'pw' });
-    await makeClient(s.baseURL).post('/api/register', { username: 'bob', password: 'pw' });
+    await s.client.post('/api/register', { username: 'alice', password: clientHash('alice', 'pw') });
+    await makeClient(s.baseURL).post('/api/register', { username: 'bob', password: clientHash('bob', 'pw') });
 
     const { data } = await s.client.get('/api/stats');
     assert.equal(data.totals.account_created, 2);
@@ -38,12 +38,12 @@ test('Stats: Registrierung zählt account_created + Live-Accounts', async () => 
 test('Stats: erfolgreiche und fehlgeschlagene Passwort-Logins werden getrennt gezählt', async () => {
   const s = await startTestServer();
   try {
-    await s.client.post('/api/register', { username: 'carol', password: 'richtig' });
+    await s.client.post('/api/register', { username: 'carol', password: clientHash('carol', 'richtig') });
     const fresh = makeClient(s.baseURL);
 
-    await fresh.post('/api/login', { username: 'carol', password: 'falsch' });
-    await fresh.post('/api/login', { username: 'gibtsnicht', password: 'x' });
-    await fresh.post('/api/login', { username: 'carol', password: 'richtig' });
+    await fresh.post('/api/login', { username: 'carol', password: clientHash('carol', 'falsch') });
+    await fresh.post('/api/login', { username: 'gibtsnicht', password: clientHash('gibtsnicht', 'x') });
+    await fresh.post('/api/login', { username: 'carol', password: clientHash('carol', 'richtig') });
 
     const { data } = await s.client.get('/api/stats');
     assert.equal(data.totals.login_password, 1);
@@ -56,7 +56,7 @@ test('Stats: erfolgreiche und fehlgeschlagene Passwort-Logins werden getrennt ge
 test('Stats: nur echte Logouts (mit Session) zählen', async () => {
   const s = await startTestServer();
   try {
-    await s.client.post('/api/register', { username: 'dave', password: 'pw' });
+    await s.client.post('/api/register', { username: 'dave', password: clientHash('dave', 'pw') });
     await s.client.post('/api/logout'); // echte Session -> zählt
 
     const stranger = makeClient(s.baseURL);
@@ -72,7 +72,7 @@ test('Stats: nur echte Logouts (mit Session) zählen', async () => {
 test('Stats: manuelles Löschen zählt account_deleted und senkt Live-Accounts', async () => {
   const s = await startTestServer();
   try {
-    await s.client.post('/api/register', { username: 'erin', password: 'pw' });
+    await s.client.post('/api/register', { username: 'erin', password: clientHash('erin', 'pw') });
     await makeClient(s.baseURL).post('/api/delete-account', { username: 'erin' });
     // Löschen eines nicht existierenden Namens darf NICHT zählen.
     await makeClient(s.baseURL).post('/api/delete-account', { username: 'gibtsnicht' });
@@ -88,8 +88,8 @@ test('Stats: manuelles Löschen zählt account_deleted und senkt Live-Accounts',
 test('Stats: Cleanup zählt account_pruned je entferntem Account', async () => {
   const s = await startTestServer();
   try {
-    await s.client.post('/api/register', { username: 'old1', password: 'pw' });
-    await makeClient(s.baseURL).post('/api/register', { username: 'old2', password: 'pw' });
+    await s.client.post('/api/register', { username: 'old1', password: clientHash('old1', 'pw') });
+    await makeClient(s.baseURL).post('/api/register', { username: 'old2', password: clientHash('old2', 'pw') });
 
     // maxAgeHours = 0 -> alle bestehenden Accounts gelten als überfällig.
     const removed = runCleanupOnce(s.db, 0);
@@ -111,7 +111,7 @@ test('Stats: /api/stats umgeht das Login-Rate-Limit nicht-blockierend', async ()
       const r = await s.client.get('/api/stats');
       assert.equal(r.status, 200);
     }
-    const reg = await s.client.post('/api/register', { username: 'frank', password: 'pw' });
+    const reg = await s.client.post('/api/register', { username: 'frank', password: clientHash('frank', 'pw') });
     assert.equal(reg.status, 201);
   } finally {
     await s.close();
