@@ -41,30 +41,6 @@
 
     <div class="alert" id="alert"></div>
 
-    <!-- ============ Überblick (Momentaufnahme) ============ -->
-    <section class="card">
-      <h2 class="mt-0" data-i18n="stats.overviewTitle">Überblick</h2>
-      <p class="card-sub" data-i18n="stats.overviewSub">Aktuelle Momentaufnahme der Übungsseite.</p>
-      <div class="stats-grid">
-        <div class="stat-tile">
-          <div class="stat-num" id="stat-live-activeAccounts">–</div>
-          <div class="stat-label" data-i18n="stats.activeAccounts">Aktive Accounts</div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-num" id="stat-live-accountsWithTotp">–</div>
-          <div class="stat-label" data-i18n="stats.withTotp">davon mit 2FA</div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-num" id="stat-live-totalPasskeys">–</div>
-          <div class="stat-label" data-i18n="stats.registeredPasskeys">Hinterlegte Passkeys</div>
-        </div>
-        <div class="stat-tile">
-          <div class="stat-num" id="stat-successRate">–</div>
-          <div class="stat-label" data-i18n="stats.successRate">Login-Erfolgsquote</div>
-        </div>
-      </div>
-    </section>
-
     <!-- ============ Accounts ============ -->
     <section class="card">
       <h2 class="mt-0" data-i18n="stats.accountsTitle">Accounts</h2>
@@ -112,6 +88,10 @@
           <div class="stat-num" id="stat-login_passkey">–</div>
           <div class="stat-label" data-i18n="stats.loginPasskey">Mit Passkey</div>
           <div class="stat-sub"><span data-i18n="stats.last24h">24 h</span>: <span id="sub-login_passkey">–</span></div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-num" id="stat-successRate">–</div>
+          <div class="stat-label" data-i18n="stats.successRate">Login-Erfolgsquote</div>
         </div>
       </div>
     </section>

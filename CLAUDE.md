@@ -40,12 +40,12 @@ Required env before running or testing: `APP_ENCRYPTION_KEY` (32 bytes as 64 hex
 **Layers:**
 - `src/config.js` — env → config object. The single place env vars are read.
 - `src/db.js` — opens SQLite (WAL, foreign keys ON), creates the schema idempotently. `users`, `credentials` (passkeys, `ON DELETE CASCADE` from credentials to users), and `events` (anonymous stats).
-- `src/store.js` — all SQL lives here; thin functions, no business logic. Exports the `EVENTS` map of stat event-type keys plus `recordEvent`/`recordEventBatch`/`getEventCounts`/`getLiveStats`.
+- `src/store.js` — all SQL lives here; thin functions, no business logic. Exports the `EVENTS` map of stat event-type keys plus `recordEvent`/`recordEventBatch`/`getEventCounts`.
 - `src/crypto.js` — AES-256-GCM at rest. Storage format is a single string `v1:<iv_b64>:<tag_b64>:<ciphertext_b64>`; decrypt throws on tampering (GCM tag). Only the TOTP secret is encrypted.
 - `src/middleware.js` — `requireAuth` (session guard) and `publicUser` (strips a DB user row down to frontend-safe fields). Use `publicUser` for any user object sent to the client.
 - `src/webauthn.js` — thin re-export of `@simplewebauthn/server` plus base64url helpers.
 - `src/routes/{auth,totp,passkey}.js` — mounted under `/api`, `/api/2fa`, `/api/passkey` respectively, behind a shared rate limiter.
-- `src/routes/stats.js` — public `GET /api/usage`, mounted **before** the login rate limiter in `src/app.js` (so reading stats doesn't burn the login attempt budget). Returns only aggregates: `live` (snapshot), `totals` (lifetime per event type), `last24h`. (Files/symbols are named `stats.*` internally; only the public URLs use `usage` — the `/stats` path was taken by an external system.)
+- `src/routes/stats.js` — public `GET /api/usage`, mounted **before** the login rate limiter in `src/app.js` (so reading stats doesn't burn the login attempt budget). Returns only cumulative event aggregates: `totals` (lifetime per event type) and `last24h`. Deliberately **no** current-state snapshot (active account count, how many currently use 2FA/passkeys) — that was intentionally removed; only counts of things that *happened* over time are exposed. (Files/symbols are named `stats.*` internally; only the public URLs use `usage` — the `/stats` path was taken by an external system.)
 - `src/cleanup.js` — env-gated periodic deletion of accounts older than `CLEANUP_MAX_AGE_HOURS`. `runCleanupOnce` is exported for direct test use; the interval timer is `unref`'d so it never blocks exit.
 
 **Login is two-step when 2FA is on.** `POST /api/login` verifies the (client-hashed) password with `argon2.verify`; if `totp_enabled`, it sets `req.session.pendingUserId` and returns `{ twofa: true }` *without* logging in. The session only becomes authenticated (`req.session.userId`) after `POST /api/login/totp` verifies the code. Password failures return a generic error to avoid user enumeration.

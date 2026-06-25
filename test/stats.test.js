@@ -10,8 +10,9 @@ test('Stats: leere Statistik liefert nur aggregierte Zahlen, keine Namen', async
   try {
     const { status, data } = await s.client.get('/api/usage');
     assert.equal(status, 200);
-    assert.ok(data.live && data.totals && data.last24h);
-    assert.equal(data.live.activeAccounts, 0);
+    assert.ok(data.totals && data.last24h);
+    // Keine Momentaufnahme des aktuellen Zustands (aktive Accounts/2FA/Passkeys).
+    assert.equal(data.live, undefined);
     // Antwort enthält nur Zahlen/Objekte – keinerlei Strings mit PII.
     const json = JSON.stringify(data);
     assert.ok(!/username|password|secret/i.test(json));
@@ -20,7 +21,7 @@ test('Stats: leere Statistik liefert nur aggregierte Zahlen, keine Namen', async
   }
 });
 
-test('Stats: Registrierung zählt account_created + Live-Accounts', async () => {
+test('Stats: Registrierung zählt account_created', async () => {
   const s = await startTestServer();
   try {
     await s.client.post('/api/register', { username: 'alice', password: clientHash('alice', 'pw') });
@@ -29,7 +30,6 @@ test('Stats: Registrierung zählt account_created + Live-Accounts', async () => 
     const { data } = await s.client.get('/api/usage');
     assert.equal(data.totals.account_created, 2);
     assert.equal(data.last24h.account_created, 2);
-    assert.equal(data.live.activeAccounts, 2);
   } finally {
     await s.close();
   }
@@ -69,7 +69,7 @@ test('Stats: nur echte Logouts (mit Session) zählen', async () => {
   }
 });
 
-test('Stats: manuelles Löschen zählt account_deleted und senkt Live-Accounts', async () => {
+test('Stats: manuelles Löschen zählt account_deleted', async () => {
   const s = await startTestServer();
   try {
     await s.client.post('/api/register', { username: 'erin', password: clientHash('erin', 'pw') });
@@ -79,7 +79,6 @@ test('Stats: manuelles Löschen zählt account_deleted und senkt Live-Accounts',
 
     const { data } = await s.client.get('/api/usage');
     assert.equal(data.totals.account_deleted, 1);
-    assert.equal(data.live.activeAccounts, 0);
   } finally {
     await s.close();
   }
@@ -97,7 +96,6 @@ test('Stats: Cleanup zählt account_pruned je entferntem Account', async () => {
 
     const { data } = await s.client.get('/api/usage');
     assert.equal(data.totals.account_pruned, 2);
-    assert.equal(data.live.activeAccounts, 0);
   } finally {
     await s.close();
   }

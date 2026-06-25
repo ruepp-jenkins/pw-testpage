@@ -46,11 +46,6 @@
   function render(data) {
     const totals = data.totals || {};
     const last24h = data.last24h || {};
-    const live = data.live || {};
-
-    setText('stat-live-activeAccounts', fmt(live.activeAccounts));
-    setText('stat-live-accountsWithTotp', fmt(live.accountsWithTotp));
-    setText('stat-live-totalPasskeys', fmt(live.totalPasskeys));
 
     EVENT_KEYS.forEach((key) => {
       setText('stat-' + key, fmt(totals[key]));

@@ -3,13 +3,13 @@
 /*
  * Öffentliche, vollständig anonyme Nutzungs-Statistik.
  *
- * Liefert ausschließlich AGGREGIERTE Zahlen:
- *   - live:    aktuelle Momentaufnahme (aktive Accounts, davon mit 2FA, Passkeys)
+ * Liefert ausschließlich AGGREGIERTE Ereignis-Summen:
  *   - totals:  Lebenszeit-Summen je Ereignistyp (siehe store.EVENTS)
  *   - last24h: dieselben Summen, aber nur der letzten 24 Stunden
  *
- * Es werden bewusst KEINE Benutzernamen, Passwörter, Secrets, IDs oder sonstige
- * personenbezogenen Daten zurückgegeben – nur Zähler. Daher ohne Login nutzbar.
+ * Bewusst KEINE Momentaufnahme des aktuellen Zustands (z.B. Anzahl aktiver
+ * Accounts oder wie viele gerade 2FA/Passkeys nutzen) und KEINE Benutzernamen,
+ * Passwörter, Secrets oder IDs – nur kumulative Zähler. Daher ohne Login nutzbar.
  *
  * Wird in src/app.js absichtlich VOR dem Login-Rate-Limiter eingehängt, damit ein
  * Aufruf der Statistik nicht das Limit für echte Login-Versuche aufbraucht.
@@ -28,7 +28,6 @@ module.exports = function statsRoutes({ db }) {
       const now = Date.now();
       res.json({
         generatedAt: now,
-        live: store.getLiveStats(db),
         totals: store.getEventCounts(db),
         last24h: store.getEventCounts(db, now - DAY_MS),
       });

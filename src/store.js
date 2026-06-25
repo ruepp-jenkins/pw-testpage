@@ -138,16 +138,6 @@ function getEventCounts(db, sinceTs = 0) {
   return out;
 }
 
-// Aktuelle Momentaufnahme (keine Verlaufsdaten): wie viele Accounts es gerade
-// gibt und wie viele davon 2FA/Passkeys nutzen. Rein aggregiert, keine Namen.
-function getLiveStats(db) {
-  return {
-    activeAccounts: db.prepare('SELECT COUNT(*) AS n FROM users').get().n,
-    accountsWithTotp: db.prepare('SELECT COUNT(*) AS n FROM users WHERE totp_enabled = 1').get().n,
-    totalPasskeys: db.prepare('SELECT COUNT(*) AS n FROM credentials').get().n,
-  };
-}
-
 module.exports = {
   EVENTS,
   createUser,
@@ -168,5 +158,4 @@ module.exports = {
   recordEvent,
   recordEventBatch,
   getEventCounts,
-  getLiveStats,
 };
