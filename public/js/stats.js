@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Statistik-Seite: holt die anonymen Aggregat-Zahlen von /api/stats und füllt
+ * Statistik-Seite: holt die anonymen Aggregat-Zahlen von /api/usage und füllt
  * die Kacheln. Enthält KEINE Secrets und zeigt ausschließlich Summen an.
  * Bei Sprachwechsel werden Zahlen/Datum im passenden Format neu gerendert.
  */
@@ -75,7 +75,7 @@
     const btn = $('btn-refresh');
     if (btn) btn.disabled = true;
     try {
-      const res = await fetch('/api/stats', { headers: { Accept: 'application/json' } });
+      const res = await fetch('/api/usage', { headers: { Accept: 'application/json' } });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       last = await res.json();
       render(last);

@@ -8,7 +8,7 @@ const { runCleanupOnce } = require('../src/cleanup');
 test('Stats: leere Statistik liefert nur aggregierte Zahlen, keine Namen', async () => {
   const s = await startTestServer();
   try {
-    const { status, data } = await s.client.get('/api/stats');
+    const { status, data } = await s.client.get('/api/usage');
     assert.equal(status, 200);
     assert.ok(data.live && data.totals && data.last24h);
     assert.equal(data.live.activeAccounts, 0);
@@ -26,7 +26,7 @@ test('Stats: Registrierung zählt account_created + Live-Accounts', async () => 
     await s.client.post('/api/register', { username: 'alice', password: clientHash('alice', 'pw') });
     await makeClient(s.baseURL).post('/api/register', { username: 'bob', password: clientHash('bob', 'pw') });
 
-    const { data } = await s.client.get('/api/stats');
+    const { data } = await s.client.get('/api/usage');
     assert.equal(data.totals.account_created, 2);
     assert.equal(data.last24h.account_created, 2);
     assert.equal(data.live.activeAccounts, 2);
@@ -45,7 +45,7 @@ test('Stats: erfolgreiche und fehlgeschlagene Passwort-Logins werden getrennt ge
     await fresh.post('/api/login', { username: 'gibtsnicht', password: clientHash('gibtsnicht', 'x') });
     await fresh.post('/api/login', { username: 'carol', password: clientHash('carol', 'richtig') });
 
-    const { data } = await s.client.get('/api/stats');
+    const { data } = await s.client.get('/api/usage');
     assert.equal(data.totals.login_password, 1);
     assert.equal(data.totals.login_failed_password, 2);
   } finally {
@@ -62,7 +62,7 @@ test('Stats: nur echte Logouts (mit Session) zählen', async () => {
     const stranger = makeClient(s.baseURL);
     await stranger.post('/api/logout'); // keine Session -> zählt nicht
 
-    const { data } = await s.client.get('/api/stats');
+    const { data } = await s.client.get('/api/usage');
     assert.equal(data.totals.logout, 1);
   } finally {
     await s.close();
@@ -77,7 +77,7 @@ test('Stats: manuelles Löschen zählt account_deleted und senkt Live-Accounts',
     // Löschen eines nicht existierenden Namens darf NICHT zählen.
     await makeClient(s.baseURL).post('/api/delete-account', { username: 'gibtsnicht' });
 
-    const { data } = await s.client.get('/api/stats');
+    const { data } = await s.client.get('/api/usage');
     assert.equal(data.totals.account_deleted, 1);
     assert.equal(data.live.activeAccounts, 0);
   } finally {
@@ -95,7 +95,7 @@ test('Stats: Cleanup zählt account_pruned je entferntem Account', async () => {
     const removed = runCleanupOnce(s.db, 0);
     assert.equal(removed, 2);
 
-    const { data } = await s.client.get('/api/stats');
+    const { data } = await s.client.get('/api/usage');
     assert.equal(data.totals.account_pruned, 2);
     assert.equal(data.live.activeAccounts, 0);
   } finally {
@@ -103,12 +103,12 @@ test('Stats: Cleanup zählt account_pruned je entferntem Account', async () => {
   }
 });
 
-test('Stats: /api/stats umgeht das Login-Rate-Limit nicht-blockierend', async () => {
+test('Stats: /api/usage umgeht das Login-Rate-Limit nicht-blockierend', async () => {
   const s = await startTestServer();
   try {
     // Viele Stats-Abrufe dürfen das Login-Limit nicht aufbrauchen.
     for (let i = 0; i < 120; i++) {
-      const r = await s.client.get('/api/stats');
+      const r = await s.client.get('/api/usage');
       assert.equal(r.status, 200);
     }
     const reg = await s.client.post('/api/register', { username: 'frank', password: clientHash('frank', 'pw') });
