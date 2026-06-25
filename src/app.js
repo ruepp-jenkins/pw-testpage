@@ -15,6 +15,7 @@ const SqliteStore = require('better-sqlite3-session-store')(session);
 const authRoutes = require('./routes/auth');
 const totpRoutes = require('./routes/totp');
 const passkeyRoutes = require('./routes/passkey');
+const statsRoutes = require('./routes/stats');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
@@ -81,11 +82,16 @@ function createApp(db, config) {
     res.sendFile(path.join(PUBLIC_DIR, 'dashboard.html'));
   });
   app.get('/guide', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'guide.html')));
+  app.get('/stats', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'stats.html')));
 
   // Statische Assets (css/js/vendor). index:false, damit '/' oben greift.
   app.use(express.static(PUBLIC_DIR, { index: false }));
 
   // --- API ---
+  // Öffentliche, anonyme Statistik – bewusst VOR dem Login-Rate-Limiter, damit
+  // sie nicht das Versuchslimit für echte Logins verbraucht.
+  app.use('/api/stats', statsRoutes({ db }));
+
   app.use('/api', loginLimiter);
   app.use('/api', authRoutes({ db, config }));
   app.use('/api/2fa', totpRoutes({ db, config }));

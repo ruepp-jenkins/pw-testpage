@@ -58,6 +58,7 @@ module.exports = function totpRoutes({ db, config }) {
       }
 
       store.enableTotp(db, user.id);
+      store.recordEvent(db, store.EVENTS.TWOFA_ENABLED);
       res.json({ ok: true });
     } catch (err) {
       next(err);
@@ -67,7 +68,11 @@ module.exports = function totpRoutes({ db, config }) {
   // 2FA deaktivieren.
   router.post('/disable', (req, res, next) => {
     try {
+      // Nur zählen, wenn tatsächlich etwas deaktiviert wurde (vorher eingerichtet).
+      const user = store.getUserById(db, req.session.userId);
+      const wasConfigured = !!(user && (user.totp_enabled || user.totp_secret_enc));
       store.disableTotp(db, req.session.userId);
+      if (wasConfigured) store.recordEvent(db, store.EVENTS.TWOFA_DISABLED);
       res.json({ ok: true });
     } catch (err) {
       next(err);

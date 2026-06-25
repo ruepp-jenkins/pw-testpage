@@ -35,12 +35,13 @@ Required env before running or testing: `APP_ENCRYPTION_KEY` (32 bytes as 64 hex
 
 **Layers:**
 - `src/config.js` — env → config object. The single place env vars are read.
-- `src/db.js` — opens SQLite (WAL, foreign keys ON), creates the schema idempotently. `users` and `credentials` (passkeys), with `ON DELETE CASCADE` from credentials to users.
-- `src/store.js` — all SQL lives here; thin functions, no business logic.
+- `src/db.js` — opens SQLite (WAL, foreign keys ON), creates the schema idempotently. `users`, `credentials` (passkeys, `ON DELETE CASCADE` from credentials to users), and `events` (anonymous stats).
+- `src/store.js` — all SQL lives here; thin functions, no business logic. Exports the `EVENTS` map of stat event-type keys plus `recordEvent`/`recordEventBatch`/`getEventCounts`/`getLiveStats`.
 - `src/crypto.js` — AES-256-GCM at rest. Storage format is a single string `v1:<iv_b64>:<tag_b64>:<ciphertext_b64>`; decrypt throws on tampering (GCM tag). Only the TOTP secret is encrypted.
 - `src/middleware.js` — `requireAuth` (session guard) and `publicUser` (strips a DB user row down to frontend-safe fields). Use `publicUser` for any user object sent to the client.
 - `src/webauthn.js` — thin re-export of `@simplewebauthn/server` plus base64url helpers.
 - `src/routes/{auth,totp,passkey}.js` — mounted under `/api`, `/api/2fa`, `/api/passkey` respectively, behind a shared rate limiter.
+- `src/routes/stats.js` — public `GET /api/stats`, mounted **before** the login rate limiter in `src/app.js` (so reading stats doesn't burn the login attempt budget). Returns only aggregates: `live` (snapshot), `totals` (lifetime per event type), `last24h`.
 - `src/cleanup.js` — env-gated periodic deletion of accounts older than `CLEANUP_MAX_AGE_HOURS`. `runCleanupOnce` is exported for direct test use; the interval timer is `unref`'d so it never blocks exit.
 
 **Login is two-step when 2FA is on.** `POST /api/login` verifies the password; if `totp_enabled`, it sets `req.session.pendingUserId` and returns `{ twofa: true }` *without* logging in. The session only becomes authenticated (`req.session.userId`) after `POST /api/login/totp` verifies the code. Password failures return a generic error to avoid user enumeration.
@@ -48,6 +49,8 @@ Required env before running or testing: `APP_ENCRYPTION_KEY` (32 bytes as 64 hex
 **Account deletion is intentionally unauthenticated.** `POST /api/delete-account` deletes by `username` with no session or password check and always returns `{ ok: true }` whether or not the user existed (anti-enumeration); passkeys cascade away via `ON DELETE CASCADE`, and the caller's own session is destroyed if they deleted themselves. This fits the throwaway-account model — don't "harden" it into requiring auth without confirming that's wanted.
 
 **WebAuthn flow.** One-time challenges are held in the session (`regChallenge` / `authChallenge`), never sent to the client to keep. Only public keys + signature counters are persisted. Passwordless/discoverable login is supported: `POST /api/passkey/login/options` with no username yields `allowCredentials: undefined`.
+
+**Stats are anonymous by construction.** The `events` table stores only `(type, created_at)` — never a user id, username, or any credential/secret. Routes call `store.recordEvent(db, store.EVENTS.X)` at the relevant success/failure points (register, login success by method, failed login by method, logout, manual delete, cleanup prune, 2FA on/off, passkey add/remove); cleanup uses `recordEventBatch` for the count it removed. Recording is best-effort (swallows errors) so it can never break an auth flow. The table is append-only (never pruned) so lifetime totals stay accurate; rows are tiny. The `/stats` page (`public/stats.html` + `public/js/stats.js`) is public and shows only these aggregates. **Don't add anything user-identifying to events** — that's the whole point.
 
 **No secrets in the frontend, enforced by CSP.** `src/app.js` sets a strict Content-Security-Policy: `'self'` only, no CDN, no inline scripts (`img-src` allows `data:` for QR codes). This is *why* the WebAuthn browser library is vendored locally via `scripts/vendor-webauthn.js` instead of loaded from a CDN — if you change frontend dependencies, keep them same-origin. The same no-inline-scripts rule is why the language (`public/js/i18n.js`) and dark-mode (`public/js/theme.js`) layers are external files. `theme.js` is loaded **blocking in `<head>`** so it can set `data-theme` on `<html>` before first paint (no light-mode flash); theme colors live as CSS variables in `public/css/styles.css`, the choice persists in `localStorage('pm_theme')`, and it falls back to `prefers-color-scheme`. The i18n layer is the analogous pattern for language (`localStorage('pm_lang')`); keep new user-facing strings bilingual in both the static HTML and `i18n.js`.
 

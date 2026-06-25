@@ -34,8 +34,19 @@ CREATE TABLE IF NOT EXISTS credentials (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Anonyme Ereignis-Statistik. Bewusst OHNE Bezug zu users/credentials: nur der
+-- Ereignistyp und ein Zeitstempel werden gespeichert – keine Benutzernamen, keine
+-- Passwort-/Secret-Daten, keine IDs. Append-only (nie geleert), damit die
+-- Gesamtsummen echte Lebenszeit-Totale bleiben; die Zeilen sind winzig.
+CREATE TABLE IF NOT EXISTS events (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  type       TEXT    NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_credentials_user ON credentials(user_id);
 CREATE INDEX IF NOT EXISTS idx_users_created ON users(created_at);
+CREATE INDEX IF NOT EXISTS idx_events_type_created ON events(type, created_at);
 `;
 
 /**

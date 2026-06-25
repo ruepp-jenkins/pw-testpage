@@ -52,6 +52,7 @@ module.exports = function authRoutes({ db, config }) {
 
       const passwordHash = await argon2.hash(password, ARGON_OPTS);
       const user = store.createUser(db, username, passwordHash);
+      store.recordEvent(db, store.EVENTS.ACCOUNT_CREATED);
 
       store.updateLastLogin(db, user.id);
       req.session.userId = user.id;
@@ -76,19 +77,22 @@ module.exports = function authRoutes({ db, config }) {
       // Strikte Prüfung. Generische Antwort, um User-Enumeration zu vermeiden.
       const ok = user ? await argon2.verify(user.password_hash, password).catch(() => false) : false;
       if (!ok) {
+        store.recordEvent(db, store.EVENTS.LOGIN_FAILED_PASSWORD);
         return res
           .status(401)
           .json({ error: 'Benutzername oder Passwort ist falsch.', code: 'INVALID_CREDENTIALS' });
       }
 
       if (user.totp_enabled) {
-        // Noch nicht eingeloggt – erst nach 2FA-Code.
+        // Noch nicht eingeloggt – erst nach 2FA-Code. (Erfolg wird erst in
+        // /login/totp gezählt, hier ist der Login noch nicht abgeschlossen.)
         req.session.pendingUserId = user.id;
         return res.json({ ok: true, twofa: true });
       }
 
       req.session.userId = user.id;
       store.updateLastLogin(db, user.id);
+      store.recordEvent(db, store.EVENTS.LOGIN_PASSWORD);
       return res.json({ ok: true, twofa: false, user: publicUser(db, user) });
     } catch (err) {
       next(err);
@@ -110,12 +114,14 @@ module.exports = function authRoutes({ db, config }) {
 
       const secret = decrypt(user.totp_secret_enc);
       if (!authenticator.check(token, secret)) {
+        store.recordEvent(db, store.EVENTS.LOGIN_FAILED_2FA);
         return res.status(401).json({ error: 'Der 2FA-Code ist ungültig.', code: 'INVALID_2FA_CODE' });
       }
 
       delete req.session.pendingUserId;
       req.session.userId = user.id;
       store.updateLastLogin(db, user.id);
+      store.recordEvent(db, store.EVENTS.LOGIN_2FA);
       return res.json({ ok: true, user: publicUser(db, user) });
     } catch (err) {
       next(err);
@@ -124,6 +130,10 @@ module.exports = function authRoutes({ db, config }) {
 
   // --- Logout ---
   router.post('/logout', (req, res) => {
+    // Nur echte Logouts zählen (eine bestehende, eingeloggte Session).
+    if (req.session && req.session.userId) {
+      store.recordEvent(db, store.EVENTS.LOGOUT);
+    }
     req.session.destroy(() => {
       res.clearCookie('sid');
       res.json({ ok: true });
@@ -149,6 +159,7 @@ module.exports = function authRoutes({ db, config }) {
       const user = store.getUserByUsername(db, username);
       if (user) {
         store.deleteUserById(db, user.id);
+        store.recordEvent(db, store.EVENTS.ACCOUNT_DELETED);
 
         // Falls man gerade seinen eigenen (eingeloggten oder pending-2FA) Account
         // löscht, die laufende Session beenden – sonst zeigt sie ins Leere.

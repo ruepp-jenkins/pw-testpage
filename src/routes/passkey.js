@@ -95,6 +95,7 @@ module.exports = function passkeyRoutes({ db, config }) {
         transports: credential.transports || [],
         nickname: typeof req.body.nickname === 'string' ? req.body.nickname.trim() : null,
       });
+      store.recordEvent(db, store.EVENTS.PASSKEY_ADDED);
 
       delete req.session.regChallenge;
       res.json({ ok: true });
@@ -142,6 +143,7 @@ module.exports = function passkeyRoutes({ db, config }) {
 
       const dbCred = store.getCredentialByCredId(db, response.id);
       if (!dbCred) {
+        store.recordEvent(db, store.EVENTS.LOGIN_FAILED_PASSKEY);
         return res.status(401).json({ error: 'Unbekannter Passkey.', code: 'PASSKEY_UNKNOWN' });
       }
 
@@ -160,6 +162,7 @@ module.exports = function passkeyRoutes({ db, config }) {
       });
 
       if (!verification.verified) {
+        store.recordEvent(db, store.EVENTS.LOGIN_FAILED_PASSKEY);
         return res.status(401).json({ error: 'Passkey-Anmeldung fehlgeschlagen.', code: 'PASSKEY_AUTH_FAILED' });
       }
 
@@ -169,6 +172,7 @@ module.exports = function passkeyRoutes({ db, config }) {
       const user = store.getUserById(db, dbCred.user_id);
       req.session.userId = user.id;
       store.updateLastLogin(db, user.id);
+      store.recordEvent(db, store.EVENTS.LOGIN_PASSKEY);
       res.json({ ok: true, user: publicUser(db, user) });
     } catch (err) {
       next(err);
@@ -193,6 +197,7 @@ module.exports = function passkeyRoutes({ db, config }) {
     if (info.changes === 0) {
       return res.status(404).json({ error: 'Passkey nicht gefunden.', code: 'PASSKEY_NOT_FOUND' });
     }
+    store.recordEvent(db, store.EVENTS.PASSKEY_REMOVED);
     res.json({ ok: true });
   });
 
