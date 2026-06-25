@@ -291,6 +291,22 @@ a:hover { text-decoration: underline; }
   margin: 18px 0;
 }
 
+/* Orangefarbener Warnhinweis (z.B. „keine echten Zugangsdaten"). */
+.warn-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff4e6;
+  border: 1px solid #ffd8a8;
+  color: #9a5410;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin: 0 0 18px;
+  font-size: .9rem;
+}
+.warn-box p { margin: 0; }
+.warn-box .warn-ico { flex: none; font-size: 1.1rem; line-height: 1.35; }
+
 /* ---------- Statistik ---------- */
 .stats-grid {
   display: grid;
@@ -380,6 +396,7 @@ a:hover { text-decoration: underline; }
 :root[data-theme="dark"] .alert-success { color: #8ce6a0; border-color: #2b5a38; }
 :root[data-theme="dark"] .alert-info { color: var(--primary); border-color: #314169; }
 :root[data-theme="dark"] .callout { color: #c2cdff; border-color: #314169; }
+:root[data-theme="dark"] .warn-box { background: #2a1c0d; border-color: #5a3d1a; color: #f0b674; }
 :root[data-theme="dark"] .btn-danger { border-color: #5b2b2b; }
 :root[data-theme="dark"] .card-danger { border-color: #5b2b2b; }
 /* Solider Lösch-Button: in Dark Mode kräftiges Rot mit weißer Schrift statt

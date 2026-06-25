@@ -34,6 +34,7 @@
       theme: { switchLabel: 'Design wählen', light: 'Helles Design', dark: 'Dunkles Design' },
       index: {
         badge: 'Demo · rein zum Üben',
+        warnCreds: 'Bitte <strong>keine echten Zugangsdaten</strong> verwenden. Diese Übungsseite dient nur zum Testen – gib niemals Passwörter oder Benutzernamen ein, die du anderswo wirklich nutzt.',
         h1: 'Übe sicher mit deinem Passwortmanager',
         p: 'Lege einen Test-Account an, speichere ihn in deinem Passwortmanager und probiere Login, 2FA und Passkeys aus. Keine E-Mail, keine echten Daten nötig.',
         tabLogin: 'Anmelden',
@@ -198,6 +199,7 @@
       theme: { switchLabel: 'Choose theme', light: 'Light theme', dark: 'Dark theme' },
       index: {
         badge: 'Demo · just for practice',
+        warnCreds: 'Please <strong>do not use real credentials</strong>. This practice site is for testing only – never enter passwords or usernames you actually use anywhere else.',
         h1: 'Practice safely with your password manager',
         p: 'Create a test account, save it in your password manager and try out login, 2FA and passkeys. No email, no real data required.',
         tabLogin: 'Sign in',
