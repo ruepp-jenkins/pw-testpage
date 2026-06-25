@@ -15,17 +15,41 @@ function int(value, fallback) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+// Wert für Express' `trust proxy`: Zahl (Hops), Boolean oder String (z.B.
+// 'loopback'/Subnetz). Leer -> Fallback.
+function trustProxy(value, fallback) {
+  if (value === undefined || value === '') return fallback;
+  if (/^\d+$/.test(value)) return parseInt(value, 10);
+  const v = String(value).toLowerCase();
+  if (['true', 'yes', 'on'].includes(v)) return true;
+  if (['false', 'no', 'off'].includes(v)) return false;
+  return value;
+}
+
 function loadConfig(env = process.env) {
+  const origin = env.ORIGIN || `http://localhost:${int(env.PORT, 3000)}`;
+
+  // Hosting-Härtung an das ORIGIN-SCHEMA koppeln, NICHT an NODE_ENV: so läuft
+  // http://localhost auch mit NODE_ENV=production (Secure-Cookies über http würden
+  // den Login sonst brechen), und hinter echtem HTTPS (ORIGIN=https://…) sind die
+  // Schutzmaßnahmen automatisch an. Beides per Env explizit übersteuerbar.
+  //   secureCookies -> Session-Cookie als `Secure` + HSTS (nur mit HTTPS sinnvoll)
+  //   trustProxy    -> korrekte Client-IP fürs Rate-Limit hinter einem Reverse-Proxy
+  const httpsOrigin = origin.startsWith('https://');
+
   return {
     port: int(env.PORT, 3000),
     nodeEnv: env.NODE_ENV || 'development',
     sessionSecret: env.SESSION_SECRET || 'dev-only-insecure-session-secret-change-me',
     dbPath: env.DB_PATH || './data/app.db',
 
+    secureCookies: bool(env.SECURE_COOKIES, httpsOrigin),
+    trustProxy: trustProxy(env.TRUST_PROXY, httpsOrigin ? 1 : false),
+
     // WebAuthn / Passkeys – für localhost optimiert.
     rpID: env.RP_ID || 'localhost',
     rpName: env.RP_NAME || 'Passwortmanager Übungs-Demo',
-    origin: env.ORIGIN || `http://localhost:${int(env.PORT, 3000)}`,
+    origin,
 
     // Cleanup-Job für alte Übungs-Accounts.
     cleanup: {
@@ -36,4 +60,4 @@ function loadConfig(env = process.env) {
   };
 }
 
-module.exports = { loadConfig, bool, int };
+module.exports = { loadConfig, bool, int, trustProxy };

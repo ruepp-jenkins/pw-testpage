@@ -11,7 +11,7 @@
   const L = (key) => (window.I18n ? window.I18n.t(key) : key);
   const alertBox = $('alert');
 
-  // Ereignis-Schlüssel = Element-IDs (#stat-<key> für die Summe, #sub-<key> für 24 h).
+  // Ereignis-Schlüssel = Element-IDs (#stat-<key> zeigt die akkumulierte Summe).
   const EVENT_KEYS = [
     'account_created', 'account_deleted', 'account_pruned', 'logout',
     'login_password', 'login_2fa', 'login_passkey',
@@ -45,11 +45,9 @@
 
   function render(data) {
     const totals = data.totals || {};
-    const last24h = data.last24h || {};
 
     EVENT_KEYS.forEach((key) => {
       setText('stat-' + key, fmt(totals[key]));
-      setText('sub-' + key, fmt(last24h[key]));
     });
 
     // Login-Erfolgsquote (über alle Methoden, gesamte Laufzeit).

@@ -102,39 +102,32 @@ function countUsers(db) {
   return db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
 }
 
-// --- Anonyme Ereignis-Statistik ---
+// --- Anonyme Nutzungs-Statistik (akkumulierte Zähler) ---
 
-// Ein einzelnes Ereignis zählen. Bewusst tolerant: eine fehlgeschlagene
+// Ein Ereignis zählen (Zähler +1). Bewusst tolerant: eine fehlgeschlagene
 // Statistik darf NIE den eigentlichen Ablauf (Login etc.) stören.
-function recordEvent(db, type, ts = now()) {
+function recordEvent(db, type) {
+  recordEventBatch(db, type, 1);
+}
+
+// Einen Zähler um count erhöhen (z.B. Cleanup-Löschungen auf einmal).
+function recordEventBatch(db, type, count) {
+  if (!count || count <= 0) return;
   try {
-    db.prepare('INSERT INTO events (type, created_at) VALUES (?, ?)').run(type, ts);
+    db.prepare(
+      `INSERT INTO stat_counters (type, count) VALUES (?, ?)
+       ON CONFLICT(type) DO UPDATE SET count = count + excluded.count`
+    ).run(type, count);
   } catch (_) {
     /* Statistik ist nebensächlich – Fehler hier ignorieren. */
   }
 }
 
-// Mehrere gleichartige Ereignisse auf einmal zählen (z.B. Cleanup-Löschungen).
-function recordEventBatch(db, type, count, ts = now()) {
-  if (!count || count <= 0) return;
-  try {
-    const stmt = db.prepare('INSERT INTO events (type, created_at) VALUES (?, ?)');
-    const tx = db.transaction((n) => {
-      for (let i = 0; i < n; i++) stmt.run(type, ts);
-    });
-    tx(count);
-  } catch (_) {
-    /* siehe recordEvent */
-  }
-}
-
-// Liefert { type: count } für alle Ereignisse seit sinceTs (Default: alle).
-function getEventCounts(db, sinceTs = 0) {
-  const rows = db
-    .prepare('SELECT type, COUNT(*) AS n FROM events WHERE created_at >= ? GROUP BY type')
-    .all(sinceTs);
+// Liefert { type: count } über alle Zähler (Lebenszeit-Summen).
+function getEventCounts(db) {
+  const rows = db.prepare('SELECT type, count FROM stat_counters').all();
   const out = {};
-  for (const r of rows) out[r.type] = r.n;
+  for (const r of rows) out[r.type] = r.count;
   return out;
 }
 

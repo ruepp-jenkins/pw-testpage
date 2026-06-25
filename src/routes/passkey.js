@@ -14,7 +14,7 @@
 const express = require('express');
 
 const store = require('../store');
-const { requireAuth, publicUser } = require('../middleware');
+const { requireAuth, publicUser, establishSession } = require('../middleware');
 const {
   generateRegistrationOptions,
   verifyRegistrationResponse,
@@ -167,10 +167,10 @@ module.exports = function passkeyRoutes({ db, config }) {
       }
 
       store.updateCredentialCounter(db, dbCred.credential_id, verification.authenticationInfo.newCounter);
-      delete req.session.authChallenge;
 
       const user = store.getUserById(db, dbCred.user_id);
-      req.session.userId = user.id;
+      // Neue Session-ID; verwirft dabei auch authChallenge aus der alten Session.
+      await establishSession(req, user.id);
       store.updateLastLogin(db, user.id);
       store.recordEvent(db, store.EVENTS.LOGIN_PASSKEY);
       res.json({ ok: true, user: publicUser(db, user) });

@@ -2,17 +2,20 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const Database = require('better-sqlite3');
 const { startTestServer, makeClient, clientHash } = require('./helpers');
 const { runCleanupOnce } = require('../src/cleanup');
+const { migrateLegacyEvents } = require('../src/db');
 
 test('Stats: leere Statistik liefert nur aggregierte Zahlen, keine Namen', async () => {
   const s = await startTestServer();
   try {
     const { status, data } = await s.client.get('/api/usage');
     assert.equal(status, 200);
-    assert.ok(data.totals && data.last24h);
-    // Keine Momentaufnahme des aktuellen Zustands (aktive Accounts/2FA/Passkeys).
+    assert.ok(data.totals);
+    // Weder Momentaufnahme (aktive Accounts/2FA/Passkeys) noch Verlaufsdaten.
     assert.equal(data.live, undefined);
+    assert.equal(data.last24h, undefined);
     // Antwort enthält nur Zahlen/Objekte – keinerlei Strings mit PII.
     const json = JSON.stringify(data);
     assert.ok(!/username|password|secret/i.test(json));
@@ -29,7 +32,6 @@ test('Stats: Registrierung zählt account_created', async () => {
 
     const { data } = await s.client.get('/api/usage');
     assert.equal(data.totals.account_created, 2);
-    assert.equal(data.last24h.account_created, 2);
   } finally {
     await s.close();
   }
@@ -113,5 +115,35 @@ test('Stats: /api/usage umgeht das Login-Rate-Limit nicht-blockierend', async ()
     assert.equal(reg.status, 201);
   } finally {
     await s.close();
+  }
+});
+
+test('Stats: Migration der alten events-Tabelle in akkumulierte Zähler', () => {
+  const db = new Database(':memory:');
+  try {
+    // Alten Zustand nachstellen: leere Zähler-Tabelle + befüllte events-Tabelle.
+    db.exec(`
+      CREATE TABLE stat_counters (type TEXT PRIMARY KEY, count INTEGER NOT NULL DEFAULT 0);
+      CREATE TABLE events (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, created_at INTEGER NOT NULL);
+    `);
+    const ins = db.prepare('INSERT INTO events (type, created_at) VALUES (?, ?)');
+    ins.run('account_created', 1);
+    ins.run('account_created', 2);
+    ins.run('logout', 3);
+
+    migrateLegacyEvents(db);
+
+    // events-Zeilen sind zu Summen geworden …
+    assert.equal(db.prepare("SELECT count FROM stat_counters WHERE type = 'account_created'").get().count, 2);
+    assert.equal(db.prepare("SELECT count FROM stat_counters WHERE type = 'logout'").get().count, 1);
+    // … und die wachsende events-Tabelle ist weg.
+    const ev = db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'events'").get();
+    assert.equal(ev, undefined);
+
+    // Idempotent: erneuter Aufruf ohne events-Tabelle ändert nichts / wirft nicht.
+    migrateLegacyEvents(db);
+    assert.equal(db.prepare("SELECT count FROM stat_counters WHERE type = 'account_created'").get().count, 2);
+  } finally {
+    db.close();
   }
 });

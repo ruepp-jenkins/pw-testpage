@@ -128,6 +128,8 @@ Laufen auch in der **Docker-Test-Stage** (`docker build --target test .`). Die *
 | `RP_ID` | WebAuthn Relying-Party-ID | `localhost` |
 | `RP_NAME` | Anzeigename | `Passwortmanager Übungs-Demo` |
 | `ORIGIN` | Erwarteter WebAuthn-Origin | `http://localhost:3000` |
+| `SECURE_COOKIES` | Session-Cookie `Secure` + HSTS | an, wenn `ORIGIN` `https://` ist |
+| `TRUST_PROXY` | Vertrauenswürdige Proxy-Hops (Client-IP fürs Rate-Limit) | `1`, wenn `ORIGIN` `https://` ist, sonst aus |
 | `CLEANUP_ENABLED` | Cleanup-Job an/aus | `false` |
 | `CLEANUP_INTERVAL_MINUTES` | Laufintervall | `60` |
 | `CLEANUP_MAX_AGE_HOURS` | Accounts älter als X löschen | `24` |
@@ -136,14 +138,22 @@ Laufen auch in der **Docker-Test-Stage** (`docker build --target test .`). Die *
 
 ## Sicherheit & Designentscheidungen
 
-- **Passwörter**: nur als **argon2id**-Hash gespeichert (nie im Klartext, nicht reversibel).
+- **Passwörter**: **Double-Hash** – der Browser hasht zuerst mit PBKDF2 (Klartext verlässt
+  das Gerät nie), der Server hasht das Ergebnis zusätzlich mit **argon2id**. Gespeichert wird
+  nur der argon2-Hash (nie Klartext, nicht reversibel).
 - **TOTP-Secrets**: **AES-256-GCM-verschlüsselt** at rest (`src/crypto.js`); Schlüssel
   ausschließlich serverseitig aus `APP_ENCRYPTION_KEY`.
 - **Keine Secrets im Frontend**: Der Browser erhält nur öffentliche WebAuthn-Optionen
   (Einmal-Challenges) und QR-Codes. Strikte **Content-Security-Policy** (kein CDN, keine
   Inline-Skripte); die WebAuthn-Browser-Bibliothek wird **lokal gevendort**.
-- **Sessions**: HttpOnly-Cookie, `SameSite=Lax`, in SQLite persistiert.
-- **Rate-Limit** auf den API-Routen gegen stures Durchprobieren.
+- **Sessions**: HttpOnly-Cookie, `SameSite=Lax`, in SQLite persistiert; bei jedem Login wird die
+  Session-ID **neu vergeben** (Schutz vor Session-Fixation). Hinter HTTPS (`ORIGIN=https://…`)
+  automatisch `Secure` + HSTS.
+- **Statistik**: nur **anonyme, akkumulierte Summen** (ein Zähler je Ereignistyp) – keine
+  Einzelereignisse, kein DB-Wachstum, keine personenbezogenen Daten (`/usage`).
+- **Rate-Limit** auf den API-Routen gegen stures Durchprobieren; bei unbekanntem Benutzer wird
+  trotzdem ein argon2-Verify ausgeführt, damit Antwortzeiten keine Rückschlüsse auf existierende
+  Accounts erlauben.
 
 ### Hinweis zu Passkeys & sicherem Kontext
 

@@ -96,6 +96,7 @@ function makeClient(baseURL) {
     get: (p) => request('GET', p),
     post: (p, b) => request('POST', p, b),
     del: (p) => request('DELETE', p),
+    cookie: (name) => cookies.get(name), // aktueller Cookie-Wert (z.B. 'sid')
   };
 }
 

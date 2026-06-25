@@ -10,6 +10,23 @@ function requireAuth(req, res, next) {
   next();
 }
 
+/**
+ * Macht die Session authentifiziert und erneuert dabei die Session-ID
+ * (Schutz gegen Session-Fixation): bei jeder Anmeldung wird eine frische ID
+ * vergeben, eine evtl. vorher untergeschobene ID wird ungültig. Speichert die
+ * Session, bevor weitergemacht wird, damit der Cookie sicher gesetzt ist.
+ * @returns {Promise<void>}
+ */
+function establishSession(req, userId) {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((err) => {
+      if (err) return reject(err);
+      req.session.userId = userId;
+      req.session.save((saveErr) => (saveErr ? reject(saveErr) : resolve()));
+    });
+  });
+}
+
 /** Reduziert ein DB-User-Objekt auf für das Frontend unbedenkliche Felder. */
 function publicUser(db, user) {
   const passkeyCount = db
@@ -24,4 +41,4 @@ function publicUser(db, user) {
   };
 }
 
-module.exports = { requireAuth, publicUser };
+module.exports = { requireAuth, publicUser, establishSession };

@@ -23,27 +23,34 @@ function createApp(db, config) {
   const app = express();
   app.disable('x-powered-by');
 
+  // Hinter einem Reverse-Proxy (HTTPS-Terminierung): echte Client-IP aus
+  // X-Forwarded-For übernehmen, damit das Rate-Limit pro Client greift und
+  // Secure-Cookies korrekt gesetzt werden. Default in Produktion an (config.js).
+  if (config.trustProxy !== false && config.trustProxy !== 0) {
+    app.set('trust proxy', config.trustProxy);
+  }
+
   // Security-Header. CSP erlaubt nur eigene Ressourcen (kein CDN); QR-Codes
-  // kommen als data:-URI -> img-src 'self' data:. HSTS aus, da http/localhost.
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        useDefaults: false,
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: ["'self'"],
-          styleSrc: ["'self'"],
-          imgSrc: ["'self'", 'data:'],
-          connectSrc: ["'self'"],
-          objectSrc: ["'none'"],
-          baseUri: ["'self'"],
-          formAction: ["'self'"],
-          frameAncestors: ["'none'"],
-        },
+  // kommen als data:-URI -> img-src 'self' data:. HSTS nur mit HTTPS sinnvoll
+  // (sonst sperrt man sich auf http/localhost aus) -> an config.secureCookies gekoppelt.
+  const helmetOptions = {
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
       },
-      hsts: false,
-    })
-  );
+    },
+  };
+  if (!config.secureCookies) helmetOptions.hsts = false;
+  app.use(helmet(helmetOptions));
 
   app.use(express.json({ limit: '64kb' }));
 
@@ -60,7 +67,7 @@ function createApp(db, config) {
       cookie: {
         httpOnly: true,
         sameSite: 'lax',
-        secure: false, // localhost via http
+        secure: config.secureCookies, // hinter HTTPS aktivieren (config.js)
         maxAge: 8 * 60 * 60 * 1000,
       },
     })

@@ -158,6 +158,28 @@ test('Eigenen Account löschen beendet die Session', async () => {
   }
 });
 
+test('Login erneuert die Session-ID (Schutz vor Session-Fixation)', async () => {
+  const s = await startTestServer();
+  try {
+    await s.client.post('/api/register', { username: 'sigi', password: clientHash('sigi', 'pw') });
+
+    // Frischer Client; zuerst eine anonyme Session erzeugen (setzt authChallenge).
+    const c = makeClient(s.baseURL);
+    await c.post('/api/passkey/login/options', {});
+    const before = c.cookie('sid');
+    assert.ok(before, 'erwartete eine anonyme Session-Cookie');
+
+    // Erfolgreicher Login muss eine NEUE Session-ID vergeben.
+    const login = await c.post('/api/login', { username: 'sigi', password: clientHash('sigi', 'pw') });
+    assert.equal(login.status, 200);
+    const after = c.cookie('sid');
+    assert.ok(after);
+    assert.notEqual(after, before);
+  } finally {
+    await s.close();
+  }
+});
+
 test('Logout beendet die Session', async () => {
   const s = await startTestServer();
   try {

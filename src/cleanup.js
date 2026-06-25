@@ -20,7 +20,7 @@ function runCleanupOnce(db, maxAgeHours, nowTs = Date.now()) {
   const cutoff = nowTs - maxAgeHours * 60 * 60 * 1000;
   const info = store.deleteUsersOlderThan(db, cutoff);
   // Automatisch entfernte Accounts anonym mitzählen (für die Statistik).
-  store.recordEventBatch(db, store.EVENTS.ACCOUNT_PRUNED, info.changes, nowTs);
+  store.recordEventBatch(db, store.EVENTS.ACCOUNT_PRUNED, info.changes);
   return info.changes;
 }
 

@@ -3,9 +3,8 @@
 /*
  * Öffentliche, vollständig anonyme Nutzungs-Statistik.
  *
- * Liefert ausschließlich AGGREGIERTE Ereignis-Summen:
- *   - totals:  Lebenszeit-Summen je Ereignistyp (siehe store.EVENTS)
- *   - last24h: dieselben Summen, aber nur der letzten 24 Stunden
+ * Liefert ausschließlich AGGREGIERTE, akkumulierte Summen:
+ *   - totals: Lebenszeit-Summe je Ereignistyp (siehe store.EVENTS)
  *
  * Bewusst KEINE Momentaufnahme des aktuellen Zustands (z.B. Anzahl aktiver
  * Accounts oder wie viele gerade 2FA/Passkeys nutzen) und KEINE Benutzernamen,
@@ -18,18 +17,14 @@
 const express = require('express');
 const store = require('../store');
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 module.exports = function statsRoutes({ db }) {
   const router = express.Router();
 
   router.get('/', (req, res, next) => {
     try {
-      const now = Date.now();
       res.json({
-        generatedAt: now,
+        generatedAt: Date.now(),
         totals: store.getEventCounts(db),
-        last24h: store.getEventCounts(db, now - DAY_MS),
       });
     } catch (err) {
       next(err);

@@ -25,9 +25,14 @@ const { authenticator } = require('otplib');
 
 const store = require('../store');
 const { decrypt } = require('../crypto');
-const { requireAuth, publicUser } = require('../middleware');
+const { requireAuth, publicUser, establishSession } = require('../middleware');
 
 const ARGON_OPTS = { type: argon2.argon2id };
+
+// Fester Dummy-Hash zur Laufzeit-Angleichung: bei unbekanntem Benutzer wird
+// trotzdem ein argon2-Verify ausgeführt, damit Login-Antworten keine
+// Zeit-Unterschiede zeigen (sonst User-Enumeration über Timing). Einmalig.
+const DUMMY_HASH = argon2.hash('constant-time-dummy-password', ARGON_OPTS);
 
 module.exports = function authRoutes({ db, config }) {
   const router = express.Router();
@@ -76,7 +81,7 @@ module.exports = function authRoutes({ db, config }) {
       store.recordEvent(db, store.EVENTS.ACCOUNT_CREATED);
 
       store.updateLastLogin(db, user.id);
-      req.session.userId = user.id;
+      await establishSession(req, user.id);
       return res.status(201).json({ ok: true, user: publicUser(db, user) });
     } catch (err) {
       // Race-Condition auf den UNIQUE-Index sauber abfangen.
@@ -103,9 +108,12 @@ module.exports = function authRoutes({ db, config }) {
 
       const user = store.getUserByUsername(db, username);
 
-      // Strikte Prüfung. Generische Antwort, um User-Enumeration zu vermeiden.
-      const ok = user ? await argon2.verify(user.password_hash, password).catch(() => false) : false;
-      if (!ok) {
+      // Strikte Prüfung mit konstanter Laufzeit: bei unbekanntem Nutzer gegen
+      // einen Dummy-Hash verifizieren, damit Timing nichts über die Existenz
+      // verrät. Generische Antwort vermeidet zusätzlich User-Enumeration.
+      const verifyTarget = user ? user.password_hash : await DUMMY_HASH;
+      const passwordOk = await argon2.verify(verifyTarget, password).catch(() => false);
+      if (!user || !passwordOk) {
         store.recordEvent(db, store.EVENTS.LOGIN_FAILED_PASSWORD);
         return res
           .status(401)
@@ -119,7 +127,7 @@ module.exports = function authRoutes({ db, config }) {
         return res.json({ ok: true, twofa: true });
       }
 
-      req.session.userId = user.id;
+      await establishSession(req, user.id);
       store.updateLastLogin(db, user.id);
       store.recordEvent(db, store.EVENTS.LOGIN_PASSWORD);
       return res.json({ ok: true, twofa: false, user: publicUser(db, user) });
@@ -129,7 +137,7 @@ module.exports = function authRoutes({ db, config }) {
   });
 
   // --- Login (Schritt 2: TOTP-Code, nur falls 2FA aktiv) ---
-  router.post('/login/totp', (req, res, next) => {
+  router.post('/login/totp', async (req, res, next) => {
     try {
       const pendingUserId = req.session.pendingUserId;
       if (!pendingUserId) {
@@ -147,8 +155,8 @@ module.exports = function authRoutes({ db, config }) {
         return res.status(401).json({ error: 'Der 2FA-Code ist ungültig.', code: 'INVALID_2FA_CODE' });
       }
 
-      delete req.session.pendingUserId;
-      req.session.userId = user.id;
+      // Neue Session-ID; verwirft dabei auch pendingUserId aus der alten Session.
+      await establishSession(req, user.id);
       store.updateLastLogin(db, user.id);
       store.recordEvent(db, store.EVENTS.LOGIN_2FA);
       return res.json({ ok: true, user: publicUser(db, user) });
