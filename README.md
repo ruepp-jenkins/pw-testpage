@@ -52,24 +52,55 @@ Aufrufen unter **http://localhost:3000** (genau diese URL verwenden – siehe Hi
 
 ---
 
-## Mit Docker
+## Mit Docker (fertiges Image)
+
+Es gibt ein automatisch gebautes Image auf Docker Hub:
+**[`ruepp/pw-testpage`](https://hub.docker.com/r/ruepp/pw-testpage)**.
+
+**Schnell & temporär** – ein Wegwerf-Container ohne `.env`, der beim Beenden wieder verschwindet
+(`--rm`). `SESSION_SECRET` und `APP_ENCRYPTION_KEY` sind Pflicht; hier bewusst unsichere Demo-Werte:
+
+```bash
+docker run --rm -p 3000:3000 \
+  -e SESSION_SECRET=temporary-demo \
+  -e APP_ENCRYPTION_KEY=00000000000000000000000000000000000000000000000000000000deadbeef \
+  ruepp/pw-testpage
+```
+
+Danach **http://localhost:3000** aufrufen. (Für echten Betrieb eigene Secrets erzeugen, siehe oben.)
+
+**Mit `docker compose`** – persistente DB im benannten Volume `appdata`:
 
 ```bash
 cp .env.example .env      # Secrets wie oben eintragen
-docker compose up --build
+docker compose up         # zieht ruepp/pw-testpage
 ```
 
 - Erreichbar unter **http://localhost:3000** (nur an `127.0.0.1` gebunden).
 - Die SQLite-DB liegt im **benannten Volume `appdata`** (Pfad `/data/app.db`) und bleibt über
   `docker compose down` / `up` hinweg **persistent**.
-- Test-Stage des Images bauen (führt `npm test` im Container aus):
-
-  ```bash
-  docker build --target test -t passwortmanager-demo:test .
-  ```
 
 > **Bind-Mount statt Volume?** In `docker-compose.yml` `- ./data:/data` nutzen und sicherstellen,
 > dass das Verzeichnis dem Container-Nutzer gehört: `mkdir -p data && sudo chown -R 1000:1000 data`.
+
+## Image selbst bauen
+
+Statt das fertige Image zu ziehen, lässt es sich auch lokal bauen (gleicher Tag, damit `docker run`
+und `docker compose` es ohne Anpassung verwenden):
+
+```bash
+docker build -t ruepp/pw-testpage .          # Runtime-Image bauen
+# danach wie oben: docker run ... ruepp/pw-testpage
+
+# Oder via Compose: build-Block in docker-compose.yml einkommentieren, dann
+docker compose up --build
+```
+
+Test-Stage bauen (führt `npm test` im Container aus, baut **kein** Laufzeit-Image):
+
+```bash
+docker build --target test -t pw-testpage:test .
+```
 
 ---
 

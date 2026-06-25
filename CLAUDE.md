@@ -20,9 +20,11 @@ npm run vendor       # re-copy the vendored WebAuthn browser build
 # Run a single test file:
 node --test --test-force-exit test/auth.test.js
 
-# Docker
-docker compose up --build                                   # http://localhost:3000, DB in named volume `appdata` at /data/app.db
-docker build --target test -t passwortmanager-demo:test .   # runs npm test inside the image
+# Docker — compose pulls the pre-built image `ruepp/pw-testpage` (build: block is commented out)
+docker compose up                                           # http://localhost:3000, DB in named volume `appdata` at /data/app.db
+docker run --rm -p 3000:3000 -e SESSION_SECRET=x -e APP_ENCRYPTION_KEY=<64-hex> ruepp/pw-testpage  # ephemeral, no .env
+docker build -t ruepp/pw-testpage .                         # self-build (or uncomment build: in compose, then `up --build`)
+docker build --target test -t pw-testpage:test .            # runs npm test inside the image
 ```
 
 There is **no linter or build step** configured (the `eslint-disable` comments in `src/app.js` are not backed by an ESLint setup). The frontend is plain HTML/CSS/JS served as-is — no bundler.

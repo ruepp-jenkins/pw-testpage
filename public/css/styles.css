@@ -323,6 +323,20 @@ a:hover { text-decoration: underline; }
 
 .footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 24px 0 8px; }
 
+/* GitHub-Link im Footer (Icon + Text), dezent. */
+.footer-meta { text-align: center; padding: 4px 0 28px; }
+.gh-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  color: var(--muted); font-size: .85rem; font-weight: 550;
+}
+.gh-link:hover { color: var(--text); text-decoration: none; }
+.gh-icon { width: 18px; height: 18px; display: block; flex: none; }
+
+/* GitHub-Icon oben rechts in der Navigation. */
+.nav-gh { display: inline-flex; align-items: center; color: var(--muted); }
+.nav-gh:hover { color: var(--text); text-decoration: none; }
+.nav-gh .gh-icon { width: 20px; height: 20px; }
+
 /* Dezenter Hinweis auf die automatische Löschung – bewusst unauffällig. */
 .expiry-note { text-align: center; color: var(--muted); font-size: .78rem; opacity: .8; margin: 24px 0 0; }
 .expiry-note[hidden] { display: none; }

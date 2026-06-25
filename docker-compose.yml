@@ -1,9 +1,13 @@
 services:
   app:
-    build:
-      context: .
-      target: runtime
-    image: passwortmanager-demo:latest
+    # Fertiges, automatisch gebautes Image von Docker Hub.
+    image: ruepp/pw-testpage
+    # Selbst bauen statt ziehen? Den build-Block einkommentieren und
+    #   docker compose up --build
+    # ausführen (baut lokal und taggt als ruepp/pw-testpage).
+    # build:
+    #   context: .
+    #   target: runtime
     # Auf localhost optimiert: nur an 127.0.0.1 binden (nicht öffentlich erreichbar).
     ports:
       - "127.0.0.1:3000:3000"
