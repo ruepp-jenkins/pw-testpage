@@ -190,3 +190,5 @@ test/                # node:test-Suiten
 ---
 
 *Übungs-Demo – bewusst ohne Passwort-/Inhaltsregeln, ausschließlich zum Testen gedacht.*
+
+<!-- CI skip test -->
